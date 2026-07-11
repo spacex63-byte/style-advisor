@@ -335,7 +335,7 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                 .clip(RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 0.dp, bottomEnd = 0.dp))
                 .background(Color.White)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Circular Score
@@ -371,6 +371,8 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                 }
             }
             
+            Spacer(modifier = Modifier.height(12.dp))
+            
             Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
                 val score = result.overallScore
                 val statusText = when {
@@ -382,7 +384,7 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                 
                 Text(
                     text = statusText,
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextNavyBlue
                 )
@@ -393,18 +395,25 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                     text = result.shortDescription,
                     fontSize = 12.sp,
                     color = TextNavyBlue,
-                    lineHeight = 16.sp
+                    lineHeight = 14.sp
                 )
                 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(30.dp))
                         .background(Color(0xFFE3F2FD))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .padding(horizontal = 6.dp, vertical = 4.dp)
                 ) {
-                    Text(result.shortTitle, fontSize = 11.sp, color = PrimaryBlue, fontWeight = FontWeight.Medium)
+                    Text(
+                        text = result.shortTitle, 
+                        fontSize = 11.sp, 
+                        color = PrimaryBlue, 
+                        fontWeight = FontWeight.Medium,
+                        lineHeight = 14.sp,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
                 }
             }
         }
