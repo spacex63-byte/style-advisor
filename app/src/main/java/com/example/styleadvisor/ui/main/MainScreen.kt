@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.FileUpload
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.*
@@ -22,13 +23,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.Image
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -67,6 +72,7 @@ fun MainScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(ThemeLightBlue)
                 .padding(
                     top = innerPadding.calculateTopPadding(),
                     bottom = innerPadding.calculateBottomPadding()
@@ -84,7 +90,7 @@ fun MainScreen(
 fun HomeContent(onItemClick: (NavKey) -> Unit) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .background(ThemeLightBlue)
             .verticalScroll(rememberScrollState())
     ) {
@@ -103,6 +109,8 @@ fun HomeContent(onItemClick: (NavKey) -> Unit) {
         Spacer(modifier = Modifier.height(32.dp))
         PromoSection()
         
+        // Add bottom padding to ensure there's enough space to scroll past the bottom nav bar
+        Spacer(modifier = Modifier.height(60.dp))
     }
 }
 
@@ -175,77 +183,115 @@ fun HeroSection() {
 
 @Composable
 fun AnalyzeButtonSection() {
+    var isImageUploaded by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Image Container
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 4.dp)
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .border(4.dp, Color.White, RoundedCornerShape(32.dp))
-                .clip(RoundedCornerShape(32.dp))
-                .background(Color(0xFFEBE3DE))
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.hero_fashion_man),
-                contentDescription = "Hero Fashion",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val bracketLength = 40.dp.toPx()
-                val bracketStroke = 4.dp.toPx()
-                val padding = 24.dp.toPx()
-                val color = Color.White
-                val cornerRadius = 8.dp.toPx()
-                
-                // Top Left
-                val pathTL = Path().apply {
-                    moveTo(padding, padding + bracketLength)
-                    lineTo(padding, padding + cornerRadius)
-                    arcTo(Rect(padding, padding, padding + 2 * cornerRadius, padding + 2 * cornerRadius), 180f, 90f, false)
-                    lineTo(padding + bracketLength, padding)
-                }
-                drawPath(pathTL, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
-                
-                // Bottom Left
-                val pathBL = Path().apply {
-                    moveTo(padding, size.height - padding - bracketLength)
-                    lineTo(padding, size.height - padding - cornerRadius)
-                    arcTo(Rect(padding, size.height - padding - 2 * cornerRadius, padding + 2 * cornerRadius, size.height - padding), 180f, -90f, false)
-                    lineTo(padding + bracketLength, size.height - padding)
-                }
-                drawPath(pathBL, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
-                
-                // Bottom Right
-                val pathBR = Path().apply {
-                    moveTo(size.width - padding, size.height - padding - bracketLength)
-                    lineTo(size.width - padding, size.height - padding - cornerRadius)
-                    arcTo(Rect(size.width - padding - 2 * cornerRadius, size.height - padding - 2 * cornerRadius, size.width - padding, size.height - padding), 0f, 90f, false)
-                    lineTo(size.width - padding - bracketLength, size.height - padding)
-                }
-                drawPath(pathBR, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
-            }
-            
+        if (isImageUploaded) {
+            // Image Container
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(24.dp)
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(PrimaryBlue),
+                    .padding(horizontal = 4.dp)
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .border(4.dp, Color.White, RoundedCornerShape(32.dp))
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(Color(0xFFEBE3DE))
+                    .clickable { isImageUploaded = false }
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.hero_fashion_man),
+                    contentDescription = "Hero Fashion",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val bracketLength = 48.dp.toPx()
+                    val bracketStroke = 4.dp.toPx()
+                    val padding = 24.dp.toPx()
+                    val color = Color.White
+                    val cornerRadius = 24.dp.toPx()
+                    
+                    // Top Left
+                    val pathTL = Path().apply {
+                        moveTo(padding, padding + bracketLength)
+                        lineTo(padding, padding + cornerRadius)
+                        arcTo(Rect(padding, padding, padding + 2 * cornerRadius, padding + 2 * cornerRadius), 180f, 90f, false)
+                        lineTo(padding + bracketLength, padding)
+                    }
+                    drawPath(pathTL, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
+                    
+                    // Top Right
+                    val pathTR = Path().apply {
+                        moveTo(size.width - padding - bracketLength, padding)
+                        lineTo(size.width - padding - cornerRadius, padding)
+                        arcTo(Rect(size.width - padding - 2 * cornerRadius, padding, size.width - padding, padding + 2 * cornerRadius), -90f, 90f, false)
+                        lineTo(size.width - padding, padding + bracketLength)
+                    }
+                    drawPath(pathTR, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
+                    
+                    // Bottom Right
+                    val pathBR = Path().apply {
+                        moveTo(size.width - padding, size.height - padding - bracketLength)
+                        lineTo(size.width - padding, size.height - padding - cornerRadius)
+                        arcTo(Rect(size.width - padding - 2 * cornerRadius, size.height - padding - 2 * cornerRadius, size.width - padding, size.height - padding), 0f, 90f, false)
+                        lineTo(size.width - padding - bracketLength, size.height - padding)
+                    }
+                    drawPath(pathBR, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
+                    
+                    // Bottom Left
+                    val pathBL = Path().apply {
+                        moveTo(padding + bracketLength, size.height - padding)
+                        lineTo(padding + cornerRadius, size.height - padding)
+                        arcTo(Rect(padding, size.height - padding - 2 * cornerRadius, padding + 2 * cornerRadius, size.height - padding), 90f, 90f, false)
+                        lineTo(padding, size.height - padding - bracketLength)
+                    }
+                    drawPath(pathBL, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
+                }
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(32.dp))
+                    .background(Color.White)
+                    .clickable { isImageUploaded = true },
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.FileUpload,
-                    contentDescription = "Upload",
-                    tint = Color.Black
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
+                        modifier = Modifier
+                            .size(90.dp)
+                            .background(ThemeLightBlue, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.FileUpload,
+                            contentDescription = "Upload Icon",
+                            tint = PrimaryBlue,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "Upload Your Outfit Photo",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextNavyBlue
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "JPG, PNG up to 10MB",
+                        fontSize = 14.sp,
+                        color = TextMuted
+                    )
+                }
             }
         }
         
@@ -339,14 +385,16 @@ fun RecentAnalysesSection(onItemClick: (NavKey) -> Unit) {
         ) {
             Text(
                 text = "Recent Analyses",
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextNavyBlue
+                color = TextNavyBlue,
+                letterSpacing = (-0.2).sp
             )
             Text(
                 text = "See all",
-                fontSize = 14.sp,
-                color = TextMuted
+                fontSize = 12.sp,
+                color = TextMuted,
+                letterSpacing = (-0.2).sp
             )
         }
         
@@ -362,6 +410,10 @@ fun RecentAnalysesSection(onItemClick: (NavKey) -> Unit) {
             AnalysisCard("Smart Casual", "2 May 2025", 86, ScoreHigh, onClick = { onItemClick(AnalysisResult) })
             AnalysisCard("Casual Day Out", "30 Apr 2025", 92, ScoreHigh, onClick = { onItemClick(AnalysisResult) })
             AnalysisCard("Evening Look", "28 Apr 2025", 78, ScoreMedium, onClick = { onItemClick(AnalysisResult) })
+            AnalysisCard("Office Wear", "22 Apr 2025", 88, ScoreHigh, onClick = { onItemClick(AnalysisResult) })
+            AnalysisCard("Weekend Chill", "18 Apr 2025", 71, ScoreMedium, onClick = { onItemClick(AnalysisResult) })
+            AnalysisCard("Party Fit", "10 Apr 2025", 65, ScoreMedium, onClick = { onItemClick(AnalysisResult) })
+            AnalysisCard("Winter Coat", "5 Apr 2025", 45, ScoreLow, onClick = { onItemClick(AnalysisResult) })
         }
     }
 }
@@ -372,15 +424,15 @@ fun AnalysisCard(title: String, date: String, score: Int, scoreColor: Color, onC
         Box(
             modifier = Modifier
                 .width(120.dp)
-                .height(160.dp)
+                .height(140.dp)
                 .clip(RoundedCornerShape(16.dp))
                 .background(SurfaceVariant)
         ) {
-            Icon(
-                imageVector = Icons.Default.Face,
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.Center).size(48.dp),
-                tint = TextMuted.copy(alpha = 0.3f)
+            Image(
+                painter = painterResource(id = R.drawable.hero_fashion_man),
+                contentDescription = "Analysis Photo",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
             
             Box(
@@ -412,14 +464,16 @@ fun AnalysisCard(title: String, date: String, score: Int, scoreColor: Color, onC
         
         Text(
             text = title,
-            fontSize = 14.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color = TextNavyBlue
+            color = TextNavyBlue,
+            letterSpacing = (-0.2).sp
         )
         Text(
             text = date,
-            fontSize = 12.sp,
+            fontSize = 11.sp,
             color = TextMuted,
+            letterSpacing = (-0.2).sp,
             modifier = Modifier.offset(y = (-4).dp)
         )
     }
@@ -434,7 +488,7 @@ fun PromoSection() {
             .clip(RoundedCornerShape(24.dp))
             .background(
                 Brush.horizontalGradient(
-                    colors = listOf(PromoBlueStart, PromoBlueEnd)
+                    colors = listOf(PromoGradientStart, PromoGradientEnd)
                 )
             )
             .padding(24.dp)
