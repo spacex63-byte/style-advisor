@@ -66,7 +66,8 @@ enum class BottomTab {
 @Composable
 fun MainScreen(
     onItemClick: (NavKey) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: AnalysisViewModel? = null
 ) {
     var selectedTab by remember { mutableStateOf(BottomTab.HOME) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -138,7 +139,12 @@ fun MainScreen(
                         selectedImageUri = selectedImageUri,
                         onImageSelected = { selectedImageUri = it },
                         isAnalyzing = isAnalyzing,
-                        onAnalyzeStarted = { isAnalyzing = true },
+                        onAnalyzeStarted = { 
+                            isAnalyzing = true
+                            selectedImageUri?.let { uri ->
+                                viewModel?.analyzeImage(context, uri)
+                            }
+                        },
                         onAnalyzeComplete = {
                             isAnalyzing = false
                             onItemClick(AnalysisResult)
@@ -338,7 +344,19 @@ fun AnalyzeButtonSection(
                     label = "scan_line_y"
                 )
                 
+                var isGoingDown by remember { mutableStateOf(true) }
+                var previousScanY by remember { mutableStateOf(0f) }
+                LaunchedEffect(scanLineY) {
+                    if (scanLineY != previousScanY) {
+                        isGoingDown = scanLineY > previousScanY
+                        previousScanY = scanLineY
+                    }
+                }
+                
                 Canvas(modifier = Modifier.fillMaxSize()) {
+                    // Light Black Overlay
+                    drawRect(color = Color.Black.copy(alpha = 0.3f))
+                    
                     val bracketLength = 48.dp.toPx()
                     val bracketStroke = 4.dp.toPx()
                     val padding = 24.dp.toPx()
@@ -381,42 +399,64 @@ fun AnalyzeButtonSection(
                     }
                     drawPath(pathBL, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
                     
-                    // --- Cool Gradient Scanning Laser Effect ---
+                    // Deep Ambient Glow
                     val currentY = scanLineY * size.height
+                    val scanColor = Color(0xFF5A75FF)
                     
-                    val colorLeft = Color(0xFF00D4FF)   // Cyan
-                    val colorCenter = Color(0xFFB042FF) // Purple
-                    val colorRight = Color(0xFFE23E57)  // Pink
-
-                    // 1. Large ambient vertical glow (using a generic mixed color for vertical fade)
-                    val mixColor = Color(0xFF8566FF)
                     drawRect(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, mixColor.copy(alpha = 0.2f), mixColor.copy(alpha = 0.6f), mixColor.copy(alpha = 0.2f), Color.Transparent),
-                            startY = currentY - 120f,
-                            endY = currentY + 120f
+                        brush = Brush.radialGradient(
+                            colors = listOf(scanColor.copy(alpha = 0.01f), Color.Transparent),
+                            center = Offset(size.width / 2, currentY),
+                            radius = 500f
                         ),
-                        topLeft = Offset(0f, currentY - 120f),
-                        size = androidx.compose.ui.geometry.Size(size.width, 240f)
+                        topLeft = Offset(0f, currentY - 500f),
+                        size = androidx.compose.ui.geometry.Size(size.width, 1000f)
                     )
                     
-                    // 2. Intense center horizontal laser beam with multi-color gradient
-                    drawRect(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(Color.Transparent, colorLeft, colorCenter, Color.White, colorCenter, colorRight, Color.Transparent),
-                            startX = 0f,
-                            endX = size.width
-                        ),
-                        topLeft = Offset(0f, currentY - 3.dp.toPx()),
-                        size = androidx.compose.ui.geometry.Size(size.width, 6.dp.toPx())
+                    // Draw Scan Line (core)
+                    drawLine(
+                        color = scanColor,
+                        start = Offset(0f, currentY),
+                        end = Offset(size.width, currentY),
+                        strokeWidth = 4.dp.toPx()
                     )
+                    
+                    // Draw Trailing Bleed
+                    if (isGoingDown) {
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, scanColor.copy(alpha = 0.6f)),
+                                startY = currentY - 150f,
+                                endY = currentY
+                            ),
+                            topLeft = Offset(0f, currentY - 150f),
+                            size = androidx.compose.ui.geometry.Size(size.width, 150f)
+                        )
+                    } else {
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(scanColor.copy(alpha = 0.6f), Color.Transparent),
+                                startY = currentY,
+                                endY = currentY + 150f
+                            ),
+                            topLeft = Offset(0f, currentY),
+                            size = androidx.compose.ui.geometry.Size(size.width, 150f)
+                        )
+                    }
                 }
                 
-                // Simulating analysis completion when the text/progress UI is removed
-                if (isAnalyzing) {
-                    LaunchedEffect(Unit) {
-                        kotlinx.coroutines.delay(3500)
-                        onAnalyzeComplete()
+                // AI Analyzing Container Overlaid at the bottom of the image
+                Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) {
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = isAnalyzing,
+                        enter = slideInVertically { it } + fadeIn(),
+                        exit = slideOutVertically { it } + fadeOut()
+                    ) {
+                        AIAnalyzingContainer(
+                            onComplete = {
+                                onAnalyzeComplete()
+                            }
+                        )
                     }
                 }
             }
@@ -521,7 +561,11 @@ fun AnalyzeButtonSection(
                 .height(60.dp)
                 .clip(RoundedCornerShape(30.dp))
                 .border(1.dp, Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(30.dp))
-                .clickable { /* Action */ },
+                .clickable {
+                    val uri = android.net.Uri.parse("android.resource://${context.packageName}/${com.example.styleadvisor.R.drawable.sample_outfit}")
+                    onImageSelected(uri)
+                    onAnalyzeStarted()
+                },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -844,7 +888,23 @@ fun BottomNavItem(
     }
 }
 
+@Composable
+fun AIAnalyzingContainer(onComplete: () -> Unit) {
+    var progress by remember { mutableStateOf(0f) }
 
+    LaunchedEffect(Unit) {
+        animate(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 3000, easing = LinearOutSlowInEasing)
+        ) { value, _ ->
+            progress = value
+        }
+        kotlinx.coroutines.delay(500)
+        onComplete()
+    }
+
+}
 
 fun android.content.Context.createImageFile(): java.io.File {
     val timeStamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault()).format(java.util.Date())

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose.compiler)
@@ -13,6 +15,16 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { localProperties.load(it) }
+        }
+        val meshApiKey = localProperties.getProperty("MESH_API_KEY") ?: "\"\""
+        // Ensure it has quotes if not provided with quotes in local.properties
+        val formattedKey = if (meshApiKey.startsWith("\"")) meshApiKey else "\"$meshApiKey\""
+        buildConfigField("String", "MESH_API_KEY", formattedKey)
     }
 
     buildTypes {
@@ -28,7 +40,7 @@ android {
     buildFeatures {
       compose = true
       aidl = false
-      buildConfig = false
+      buildConfig = true
       shaders = false
     }
 
@@ -83,4 +95,8 @@ dependencies {
   implementation(libs.androidx.navigation3.ui)
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+  // Mesh API (OpenAI compatible REST calls)
+  implementation("com.squareup.okhttp3:okhttp:4.12.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 }

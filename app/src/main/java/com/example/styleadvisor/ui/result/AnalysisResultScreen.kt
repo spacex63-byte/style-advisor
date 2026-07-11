@@ -24,9 +24,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.styleadvisor.theme.*
+import com.example.styleadvisor.model.AnalysisResult
+import com.example.styleadvisor.ui.main.AnalysisState
+import com.example.styleadvisor.ui.main.AnalysisViewModel
+import coil.compose.AsyncImage
+import android.net.Uri
 
 @Composable
-fun AnalysisResultScreen(onBack: () -> Unit) {
+fun AnalysisResultScreen(
+    onBack: () -> Unit,
+    viewModel: AnalysisViewModel? = null
+) {
+    val uiState by viewModel?.uiState?.collectAsState(initial = AnalysisState.Idle) ?: remember { mutableStateOf(AnalysisState.Idle) }
+    val imageUri by viewModel?.selectedImageUri?.collectAsState(initial = null) ?: remember { mutableStateOf(null) }
+
     Box(modifier = Modifier.fillMaxSize().background(GlobalBackgroundGradient)) {
         Scaffold(
             containerColor = Color.Transparent,
@@ -40,45 +51,64 @@ fun AnalysisResultScreen(onBack: () -> Unit) {
                 }
             }
         ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                OverviewContent()
+            when (val state = uiState) {
+                is AnalysisState.Analyzing -> {
+                    Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator(color = PrimaryBlue)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("AI is analyzing your style...", color = TextNavyBlue, fontSize = 16.sp)
+                        }
+                    }
+                }
+                is AnalysisState.Success -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        OverviewContent(result = state.result, imageUri = imageUri)
+                    }
+                }
+                is AnalysisState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
+                        Text(text = "Error: ${state.message}", color = Color.Red)
+                    }
+                }
+                else -> {}
             }
         }
     }
 }
 
 @Composable
-fun OverviewContent() {
+fun OverviewContent(result: AnalysisResult, imageUri: Uri?) {
     Column {
         Spacer(modifier = Modifier.height(16.dp))
-        HeroScoreCard()
+        HeroScoreCard(result = result, imageUri = imageUri)
         
         Spacer(modifier = Modifier.height(24.dp))
-        NewAttributeGrid()
+        NewAttributeGrid(result = result)
         
         Spacer(modifier = Modifier.height(16.dp))
-        StyleOverviewCard()
+        StyleOverviewCard(tags = result.styleTags)
         
         Spacer(modifier = Modifier.height(16.dp))
-        BestForCard()
+        BestForCard(occasions = result.bestForOccasions)
         
         Spacer(modifier = Modifier.height(16.dp))
         FeedbackCard(
             isPositive = true,
             title = "What Looks Best",
-            description = "The earthy tones, clean layering and fitted pants create a balanced and modern look."
+            description = result.whatLooksBest
         )
         
         Spacer(modifier = Modifier.height(16.dp))
         FeedbackCard(
             isPositive = false,
             title = "What Could Improve",
-            description = "Try adding a statement accessory and different shoes to elevate the look."
+            description = result.whatCouldImprove
         )
         
         Spacer(modifier = Modifier.height(32.dp))
@@ -276,7 +306,7 @@ fun ResultTopBar(title: String, onBack: () -> Unit) {
 }
 
 @Composable
-fun HeroScoreCard() {
+fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -306,7 +336,7 @@ fun HeroScoreCard() {
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
-                            progress = { 0.86f },
+                            progress = { result.overallScore / 100f },
                             modifier = Modifier.fillMaxSize(),
                             color = ScoreTextBlue,
                             trackColor = Color(0xFFFDECE9),
@@ -318,7 +348,7 @@ fun HeroScoreCard() {
                             modifier = Modifier.offset(y = 2.dp)
                         ) {
                             Text(
-                                text = "86",
+                                text = "${result.overallScore}",
                                 fontSize = 28.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = TextNavyBlue,
@@ -336,7 +366,7 @@ fun HeroScoreCard() {
                     Spacer(modifier = Modifier.height(20.dp))
                     
                     Text(
-                        text = "Great Look! \uD83D\uDD25",
+                        text = result.shortTitle,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextNavyBlue,
@@ -344,7 +374,7 @@ fun HeroScoreCard() {
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "You've got a confident and stylish vibe.",
+                        text = result.shortDescription,
                         fontSize = 12.sp,
                         color = TextNavyBlue,
                         lineHeight = 18.sp
@@ -359,19 +389,28 @@ fun HeroScoreCard() {
                     .fillMaxHeight()
                     .background(SurfaceVariant)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.align(Alignment.Center).size(120.dp),
-                    tint = TextMuted.copy(alpha = 0.3f)
-                )
+                if (imageUri != null) {
+                    AsyncImage(
+                        model = imageUri,
+                        contentDescription = "Analyzed image",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.align(Alignment.Center).size(120.dp),
+                        tint = TextMuted.copy(alpha = 0.3f)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun NewAttributeGrid() {
+fun NewAttributeGrid(result: AnalysisResult) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -379,10 +418,10 @@ fun NewAttributeGrid() {
             .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.Palette, label = "Color\nHarmony", score = "88")
-        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.Person, label = "Fit", score = "85") // Using Person/Checkroom placeholder
-        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.ThumbUp, label = "Style", score = "87")
-        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.Star, label = "Overall", score = "86", isHighlight = true)
+        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.Palette, label = "Color\nHarmony", score = "${result.colorHarmonyScore}")
+        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.Person, label = "Fit", score = "${result.fitScore}") // Using Person/Checkroom placeholder
+        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.ThumbUp, label = "Style", score = "${result.styleScore}")
+        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.Star, label = "Overall", score = "${result.overallScore}", isHighlight = true)
     }
 }
 
@@ -409,7 +448,7 @@ fun NewAttributeCard(modifier: Modifier = Modifier, icon: androidx.compose.ui.gr
 }
 
 @Composable
-fun StyleOverviewCard() {
+fun StyleOverviewCard(tags: List<String>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -426,10 +465,9 @@ fun StyleOverviewCard() {
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            PillTag(text = "Smart Casual", isPrimary = true)
-            PillTag(text = "Minimal", isPrimary = false)
-            PillTag(text = "Clean", isPrimary = false)
-            PillTag(text = "Modern", isPrimary = false)
+            tags.forEachIndexed { index, tag ->
+                PillTag(text = tag, isPrimary = index == 0)
+            }
         }
     }
 }
@@ -449,7 +487,7 @@ fun PillTag(text: String, isPrimary: Boolean) {
 }
 
 @Composable
-fun BestForCard() {
+fun BestForCard(occasions: List<String>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -466,10 +504,17 @@ fun BestForCard() {
                 .horizontalScroll(rememberScrollState()),
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            BestForItem(icon = Icons.Default.ShoppingBag, label = "Casual\nOuting")
-            BestForItem(icon = Icons.Default.FavoriteBorder, label = "Date\nNight")
-            BestForItem(icon = Icons.Default.Flight, label = "Travel")
-            BestForItem(icon = Icons.Default.School, label = "College")
+            val iconMap = mapOf(
+                "Casual Outing" to Icons.Default.ShoppingBag,
+                "Date Night" to Icons.Default.FavoriteBorder,
+                "Travel" to Icons.Default.Flight,
+                "College" to Icons.Default.School,
+                "Work" to Icons.Default.Work,
+                "Party" to Icons.Default.LocalBar
+            )
+            occasions.forEach { occasion ->
+                BestForItem(icon = iconMap[occasion] ?: Icons.Default.Check, label = occasion.replace(" ", "\n"))
+            }
         }
     }
 }

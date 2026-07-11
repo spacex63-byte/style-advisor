@@ -12,9 +12,13 @@ import com.example.styleadvisor.ui.main.MainScreen
 
 import androidx.compose.animation.*
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.styleadvisor.ui.main.AnalysisViewModel
+
 @Composable
 fun MainNavigation() {
   val backStack = rememberNavBackStack(Main)
+  val analysisViewModel: AnalysisViewModel = viewModel()
 
   NavDisplay(
     backStack = backStack,
@@ -24,10 +28,10 @@ fun MainNavigation() {
     entryProvider =
       entryProvider {
         entry<Main> {
-          MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier)
+          MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier, viewModel = analysisViewModel)
         }
         entry<AnalysisResult> {
-          com.example.styleadvisor.ui.result.AnalysisResultScreen(onBack = { backStack.removeLastOrNull() })
+          com.example.styleadvisor.ui.result.AnalysisResultScreen(onBack = { backStack.removeLastOrNull() }, viewModel = analysisViewModel)
         }
       },
   )
