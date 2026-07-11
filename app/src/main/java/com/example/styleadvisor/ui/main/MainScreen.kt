@@ -698,7 +698,7 @@ fun PromoSection() {
                     colors = listOf(PromoPopStart, PromoPopEnd)
                 )
             )
-            .padding(24.dp)
+            .padding(16.dp)
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {

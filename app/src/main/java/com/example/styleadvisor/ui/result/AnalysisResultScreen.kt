@@ -30,6 +30,7 @@ import com.example.styleadvisor.theme.*
 import com.example.styleadvisor.model.AnalysisResult
 import com.example.styleadvisor.ui.main.AnalysisState
 import com.example.styleadvisor.ui.main.AnalysisViewModel
+import com.example.styleadvisor.ui.main.PromoSection
 import coil.compose.AsyncImage
 import android.net.Uri
 
@@ -92,13 +93,19 @@ fun OverviewContent(result: AnalysisResult, imageUri: Uri?) {
         HeroScoreCard(result = result, imageUri = imageUri)
         
         Spacer(modifier = Modifier.height(16.dp))
-        NewAttributeGrid(result = result)
+        ScoreBreakdownCard(result = result)
         
         Spacer(modifier = Modifier.height(16.dp))
         StyleOverviewCard(tags = result.styleTags)
         
         Spacer(modifier = Modifier.height(16.dp))
         BestForCard(occasions = result.bestForOccasions)
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        OutfitElementsCard(elements = result.outfitElements)
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        DetectedColorsCard(colors = result.detectedColors, description = result.colorsDescription)
         
         Spacer(modifier = Modifier.height(16.dp))
         FeedbackCard(
@@ -115,19 +122,7 @@ fun OverviewContent(result: AnalysisResult, imageUri: Uri?) {
         )
         
         Spacer(modifier = Modifier.height(16.dp))
-        ScoreBreakdownCard(result = result)
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        OutfitElementsCard(elements = result.outfitElements)
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        DetectedColorsCard(colors = result.detectedColors, description = result.colorsDescription)
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        PersonalizedTipsCard(tips = result.personalizedTips)
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        UpgradeProCard()
+        PromoSection()
         
         Spacer(modifier = Modifier.height(32.dp))
     }
@@ -531,7 +526,7 @@ fun BestForCard(occasions: List<String>) {
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(Color.White)
-            .padding(20.dp)
+            .padding(16.dp)
     ) {
         Text(text = "Best For", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(20.dp))
@@ -618,7 +613,7 @@ fun ScoreBreakdownCard(result: AnalysisResult) {
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(Color.White)
-            .padding(20.dp)
+            .padding(16.dp)
     ) {
         Text(text = "Score Breakdown", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(20.dp))
@@ -670,7 +665,7 @@ fun OutfitElementsCard(elements: List<String>) {
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(Color.White)
-            .padding(20.dp)
+            .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -718,7 +713,7 @@ fun DetectedColorsCard(colors: List<String>, description: String) {
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(Color.White)
-            .padding(20.dp)
+            .padding(16.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
