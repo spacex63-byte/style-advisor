@@ -37,11 +37,14 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.text.style.TextAlign
 import android.content.Intent
 import android.net.Uri
+import androidx.navigation3.runtime.NavKey
+import com.example.styleadvisor.HelpSupport
+import com.example.styleadvisor.PrivacyPolicy
 import com.example.styleadvisor.theme.*
 import com.example.styleadvisor.R
 
 @Composable
-fun ProfileContent() {
+fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -281,7 +284,7 @@ fun ProfileContent() {
         Spacer(modifier = Modifier.height(24.dp))
         
         // More Section
-        MoreSection()
+        MoreSection(onItemClick = onItemClick)
         
         Spacer(modifier = Modifier.height(100.dp))
     }
@@ -535,9 +538,7 @@ fun TopStyleCard() {
 }
 
 @Composable
-fun MoreSection() {
-    var showHelpSupport by remember { mutableStateOf(false) }
-    var showPrivacyPolicy by remember { mutableStateOf(false) }
+fun MoreSection(onItemClick: (NavKey) -> Unit = {}) {
     var showLogout by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -564,7 +565,7 @@ fun MoreSection() {
             MoreItem(
                 icon = Icons.AutoMirrored.Filled.HelpOutline,
                 title = "Help & Support",
-                onClick = { showHelpSupport = true }
+                onClick = { onItemClick(HelpSupport) }
             )
             HorizontalDivider(color = Color(0xFFF0F0F0), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
             MoreItem(
@@ -576,7 +577,7 @@ fun MoreSection() {
             MoreItem(
                 icon = Icons.Default.Security,
                 title = "Privacy Policy",
-                onClick = { showPrivacyPolicy = true }
+                onClick = { onItemClick(PrivacyPolicy) }
             )
             HorizontalDivider(color = Color(0xFFF0F0F0), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
             MoreItem(
@@ -587,72 +588,6 @@ fun MoreSection() {
                 onClick = { showLogout = true }
             )
         }
-    }
-
-    if (showHelpSupport) {
-        AlertDialog(
-            onDismissRequest = { showHelpSupport = false },
-            title = {
-                Text(text = "Help & Support", fontWeight = FontWeight.Bold, color = TextNavyBlue)
-            },
-            text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text("FAQ", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = TextNavyBlue)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("Q: How does the Style Score work?", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextNavyBlue)
-                    Text("A: Our AI analyzes your outfit's color harmony, fit, and occasion appropriateness to calculate your score.", fontSize = 14.sp, color = TextMuted)
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text("Q: How can I improve my recommendations?", fontWeight = FontWeight.SemiBold, fontSize = 14.sp, color = TextNavyBlue)
-                    Text("A: Complete your Style Profile and log outfits daily for better personalized suggestions.", fontSize = 14.sp, color = TextMuted)
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val intent = Intent(Intent.ACTION_SENDTO).apply {
-                            data = Uri.parse("mailto:facttech709@gmail.com")
-                            putExtra(Intent.EXTRA_SUBJECT, "Support Request: Style Advisor")
-                        }
-                        context.startActivity(intent)
-                        showHelpSupport = false
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
-                ) {
-                    Text("Email Support", color = Color.White)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showHelpSupport = false }) {
-                    Text("Close", color = TextMuted)
-                }
-            },
-            containerColor = Color.White,
-            shape = RoundedCornerShape(20.dp)
-        )
-    }
-
-    if (showPrivacyPolicy) {
-        AlertDialog(
-            onDismissRequest = { showPrivacyPolicy = false },
-            title = {
-                Text(text = "Privacy Policy", fontWeight = FontWeight.Bold, color = TextNavyBlue)
-            },
-            text = {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    Text("Last Updated: July 2026\n\nWelcome to Style Advisor. We value your privacy and are committed to protecting your personal data.\n\n1. Information We Collect\nWe collect information you provide directly, such as your style preferences, uploaded photos for analysis, and profile details.\n\n2. How We Use Your Information\nYour data is used to provide AI-driven fashion recommendations, improve our algorithms, and personalize your experience.\n\n3. Data Security\nWe implement industry-standard security measures to ensure your uploaded images and personal details are safe and never shared with unauthorized third parties.\n\n4. Your Rights\nYou can delete your account and data at any time from the app settings.", fontSize = 14.sp, color = TextMuted, lineHeight = 20.sp)
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = { showPrivacyPolicy = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
-                ) {
-                    Text("Got it", color = Color.White)
-                }
-            },
-            containerColor = Color.White,
-            shape = RoundedCornerShape(20.dp)
-        )
     }
 
     if (showLogout) {

@@ -150,7 +150,7 @@ fun MainScreen(
                             onItemClick(AnalysisResult)
                         }
                     )
-                    BottomTab.PROFILE -> ProfileContent()
+                    BottomTab.PROFILE -> ProfileContent(onItemClick = onItemClick)
                 }
             }
         }

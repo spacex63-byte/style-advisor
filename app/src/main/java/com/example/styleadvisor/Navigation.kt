@@ -14,6 +14,8 @@ import androidx.compose.animation.*
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.styleadvisor.ui.main.AnalysisViewModel
+import com.example.styleadvisor.ui.profile.HelpSupportScreen
+import com.example.styleadvisor.ui.profile.PrivacyPolicyScreen
 
 @Composable
 fun MainNavigation() {
@@ -32,6 +34,12 @@ fun MainNavigation() {
         }
         entry<AnalysisResult> {
           com.example.styleadvisor.ui.result.AnalysisResultScreen(onBack = { backStack.removeLastOrNull() }, viewModel = analysisViewModel)
+        }
+        entry<HelpSupport> {
+          HelpSupportScreen(onBack = { backStack.removeLastOrNull() })
+        }
+        entry<PrivacyPolicy> {
+          PrivacyPolicyScreen(onBack = { backStack.removeLastOrNull() })
         }
       },
   )
