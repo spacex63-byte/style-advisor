@@ -25,7 +25,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.painterResource
 import com.example.styleadvisor.theme.*
+import com.example.styleadvisor.R
 
 @Composable
 fun ProfileContent() {
@@ -511,7 +513,7 @@ fun TopStyleCard() {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Default.Checkroom, // Suit jacket equivalent placeholder
+                painter = painterResource(id = R.drawable.ic_cloth),
                 contentDescription = null,
                 tint = TextNavyBlue,
                 modifier = Modifier.size(30.dp)
