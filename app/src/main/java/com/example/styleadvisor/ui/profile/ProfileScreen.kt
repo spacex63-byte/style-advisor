@@ -182,32 +182,41 @@ fun ProfileContent() {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color.White)
-                .padding(16.dp),
+                .background(Color(0xFFF0F4FF))
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, SurfaceVariant, RoundedCornerShape(12.dp)),
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(Color.White)
+                    .border(1.dp, SurfaceVariant, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Checkroom, contentDescription = null, tint = TextNavyBlue)
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_cloth),
+                    contentDescription = null,
+                    tint = TextNavyBlue,
+                    modifier = Modifier.size(24.dp)
+                )
             }
             
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy((-2).dp)
+            ) {
                 Text(
                     text = "Style Profile",
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextNavyBlue
                 )
                 Text(
                     text = "Complete your style profile",
-                    fontSize = 12.sp,
+                    fontSize = 11.sp,
                     color = TextMuted
                 )
             }
@@ -287,16 +296,14 @@ fun StatItem(value: String, label: String) {
 
 @Composable
 fun GraphCard() {
-    val graphBg = Brush.verticalGradient(
-        colors = listOf(Color(0xFF351C1A), Color(0xFF1E100D))
-    )
-    val lineColor = Color(0xFFEBC77D)
+    val graphBg = Color(0xFFF0F4FA)
+    val lineColor = Color(0xFF3C60F4)
     
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .height(220.dp)
+            .height(240.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(graphBg)
             .padding(20.dp)
@@ -311,46 +318,71 @@ fun GraphCard() {
                     Text(
                         text = "Style Score",
                         fontSize = 14.sp,
-                        color = Color.White.copy(alpha = 0.7f)
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF6B7A99)
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
                             text = "87",
-                            fontSize = 36.sp,
+                            fontSize = 42.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = Color(0xFF0B1527)
                         )
                         Text(
                             text = " /100",
                             fontSize = 16.sp,
-                            color = Color.White.copy(alpha = 0.7f),
-                            modifier = Modifier.padding(bottom = 6.dp)
+                            color = Color(0xFF6B7A99),
+                            modifier = Modifier.padding(bottom = 8.dp)
                         )
                         
                         Spacer(modifier = Modifier.width(16.dp))
                         
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 12.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowDropUp,
                                 contentDescription = null,
-                                tint = ScoreHigh,
+                                tint = Color(0xFF4CAF50),
                                 modifier = Modifier.size(20.dp)
                             )
                             Text(
                                 text = "12%",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = ScoreHigh
+                                color = Color(0xFF4CAF50)
                             )
                         }
                     }
                 }
+                
+                // This Month dropdown
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White)
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "This Month",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF0B1527)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = Color(0xFF0B1527),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             
             // Canvas Graph
             Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
@@ -359,14 +391,11 @@ fun GraphCard() {
                     val h = size.height
                     
                     val points = listOf(
-                        0f to 0.8f,
-                        0.15f to 0.7f,
-                        0.3f to 0.75f,
-                        0.45f to 0.5f,
-                        0.6f to 0.45f,
-                        0.75f to 0.5f,
-                        0.9f to 0.3f,
-                        1f to 0.2f
+                        0f to 0.7f,
+                        0.25f to 0.65f,
+                        0.5f to 0.45f,
+                        0.75f to 0.48f,
+                        1f to 0.25f
                     )
                     
                     val path = Path()
@@ -391,7 +420,7 @@ fun GraphCard() {
                     drawPath(
                         path = fillPath,
                         brush = Brush.verticalGradient(
-                            colors = listOf(lineColor.copy(alpha = 0.3f), Color.Transparent)
+                            colors = listOf(lineColor.copy(alpha = 0.2f), Color.Transparent)
                         )
                     )
                     
@@ -407,12 +436,12 @@ fun GraphCard() {
                         val x = xRatio * w
                         val y = yRatio * h
                         drawCircle(
-                            color = Color.White,
-                            radius = 4.dp.toPx(),
+                            color = lineColor,
+                            radius = 5.dp.toPx(),
                             center = Offset(x, y)
                         )
                         drawCircle(
-                            color = lineColor,
+                            color = Color.White,
                             radius = 3.dp.toPx(),
                             center = Offset(x, y)
                         )
@@ -420,7 +449,7 @@ fun GraphCard() {
                 }
             }
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             // X-axis labels
             Row(
@@ -431,8 +460,9 @@ fun GraphCard() {
                 labels.forEach { label ->
                     Text(
                         text = label,
-                        fontSize = 10.sp,
-                        color = Color.White.copy(alpha = 0.5f)
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF0B1527)
                     )
                 }
             }
