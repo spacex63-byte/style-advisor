@@ -8,14 +8,14 @@ import androidx.compose.ui.graphics.Color
 
 private val CustomColorScheme =
   lightColorScheme(
-    primary = TextDarkMaroon,
+    primary = TextNavyBlue,
     secondary = TextMuted,
-    background = BackgroundWarmWhite,
+    background = BackgroundCoolWhite,
     surface = CardBackground,
     onPrimary = Color.White,
     onSecondary = Color.White,
-    onBackground = TextDarkMaroon,
-    onSurface = TextDarkMaroon,
+    onBackground = TextNavyBlue,
+    onSurface = TextNavyBlue,
   )
 
 @Composable

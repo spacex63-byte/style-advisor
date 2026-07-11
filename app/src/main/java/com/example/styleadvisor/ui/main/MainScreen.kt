@@ -14,16 +14,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.Image
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation3.runtime.NavKey
 import com.example.styleadvisor.AnalysisResult
+import com.example.styleadvisor.R
 import com.example.styleadvisor.theme.*
 import com.example.styleadvisor.ui.profile.ProfileContent
 
@@ -60,7 +69,7 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(
                     top = innerPadding.calculateTopPadding(),
-                    bottom = 70.dp
+                    bottom = innerPadding.calculateBottomPadding()
                 )
         ) {
             when (selectedTab) {
@@ -76,12 +85,13 @@ fun HomeContent(onItemClick: (NavKey) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(ThemeLightBlue)
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         TopAppBarSection()
         
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(15.dp))
         HeroSection()
         
         Spacer(modifier = Modifier.height(20.dp))
@@ -105,23 +115,34 @@ fun TopAppBarSection() {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Spacer to maintain center alignment for the title
-        Spacer(modifier = Modifier.size(40.dp))
+        IconButton(onClick = { }) {
+            Icon(
+                imageVector = Icons.Default.Menu,
+                contentDescription = "Menu",
+                tint = TextNavyBlue
+            )
+        }
 
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = "Style Advisor",
-                fontSize = 17.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextDarkMaroon
+                text = "Style",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextNavyBlue
+            )
+            Text(
+                text = "Advisor",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = PrimaryBlue
             )
         }
 
         IconButton(onClick = { }) {
             Icon(
-                imageVector = Icons.Outlined.Notifications,
+                imageVector = Icons.Filled.Notifications,
                 contentDescription = "Notifications",
-                tint = TextDarkMaroon
+                tint = TextNavyBlue
             )
         }
     }
@@ -134,10 +155,10 @@ fun HeroSection() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Get AI-Powered Fashion Advice",
+            text = "Get AI-Powered\nFashion Advice",
             fontSize = 32.sp,
             fontWeight = FontWeight.ExtraBold,
-            color = TextDarkMaroon,
+            color = TextNavyBlue,
             lineHeight = 36.sp,
             textAlign = TextAlign.Center
         )
@@ -163,28 +184,52 @@ fun AnalyzeButtonSection() {
         // Image Container
         Box(
             modifier = Modifier
+                .padding(horizontal = 4.dp)
                 .fillMaxWidth()
                 .aspectRatio(1f)
+                .border(4.dp, Color.White, RoundedCornerShape(32.dp))
                 .clip(RoundedCornerShape(32.dp))
                 .background(Color(0xFFEBE3DE))
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.hero_fashion_man),
+                contentDescription = "Hero Fashion",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val bracketLength = 40.dp.toPx()
                 val bracketStroke = 4.dp.toPx()
                 val padding = 24.dp.toPx()
                 val color = Color.White
+                val cornerRadius = 8.dp.toPx()
                 
                 // Top Left
-                drawLine(color, Offset(padding, padding), Offset(padding + bracketLength, padding), strokeWidth = bracketStroke, cap = StrokeCap.Round)
-                drawLine(color, Offset(padding, padding), Offset(padding, padding + bracketLength), strokeWidth = bracketStroke, cap = StrokeCap.Round)
+                val pathTL = Path().apply {
+                    moveTo(padding, padding + bracketLength)
+                    lineTo(padding, padding + cornerRadius)
+                    arcTo(Rect(padding, padding, padding + 2 * cornerRadius, padding + 2 * cornerRadius), 180f, 90f, false)
+                    lineTo(padding + bracketLength, padding)
+                }
+                drawPath(pathTL, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
                 
                 // Bottom Left
-                drawLine(color, Offset(padding, size.height - padding), Offset(padding + bracketLength, size.height - padding), strokeWidth = bracketStroke, cap = StrokeCap.Round)
-                drawLine(color, Offset(padding, size.height - padding), Offset(padding, size.height - padding - bracketLength), strokeWidth = bracketStroke, cap = StrokeCap.Round)
+                val pathBL = Path().apply {
+                    moveTo(padding, size.height - padding - bracketLength)
+                    lineTo(padding, size.height - padding - cornerRadius)
+                    arcTo(Rect(padding, size.height - padding - 2 * cornerRadius, padding + 2 * cornerRadius, size.height - padding), 180f, -90f, false)
+                    lineTo(padding + bracketLength, size.height - padding)
+                }
+                drawPath(pathBL, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
                 
                 // Bottom Right
-                drawLine(color, Offset(size.width - padding, size.height - padding), Offset(size.width - padding - bracketLength, size.height - padding), strokeWidth = bracketStroke, cap = StrokeCap.Round)
-                drawLine(color, Offset(size.width - padding, size.height - padding), Offset(size.width - padding, size.height - padding - bracketLength), strokeWidth = bracketStroke, cap = StrokeCap.Round)
+                val pathBR = Path().apply {
+                    moveTo(size.width - padding, size.height - padding - bracketLength)
+                    lineTo(size.width - padding, size.height - padding - cornerRadius)
+                    arcTo(Rect(size.width - padding - 2 * cornerRadius, size.height - padding - 2 * cornerRadius, size.width - padding, size.height - padding), 0f, 90f, false)
+                    lineTo(size.width - padding - bracketLength, size.height - padding)
+                }
+                drawPath(pathBR, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
             }
             
             Box(
@@ -193,7 +238,7 @@ fun AnalyzeButtonSection() {
                     .padding(24.dp)
                     .size(48.dp)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFFF4A28C)),
+                    .background(PrimaryBlue),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -212,7 +257,7 @@ fun AnalyzeButtonSection() {
                 .fillMaxWidth()
                 .height(60.dp)
                 .clip(RoundedCornerShape(30.dp))
-                .background(TextDarkMaroon)
+                .background(TextNavyBlue)
                 .clickable { /* Action */ },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
@@ -245,7 +290,7 @@ fun AnalyzeButtonSection() {
             Text(
                 text = "or",
                 modifier = Modifier.padding(horizontal = 16.dp),
-                color = TextDarkMaroon,
+                color = TextNavyBlue,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -268,13 +313,13 @@ fun AnalyzeButtonSection() {
             Icon(
                 imageVector = Icons.Default.Checkroom,
                 contentDescription = "Sample",
-                tint = TextDarkMaroon,
+                tint = TextNavyBlue,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = "Try with a Sample",
-                color = TextDarkMaroon,
+                color = TextNavyBlue,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -296,7 +341,7 @@ fun RecentAnalysesSection(onItemClick: (NavKey) -> Unit) {
                 text = "Recent Analyses",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextDarkMaroon
+                color = TextNavyBlue
             )
             Text(
                 text = "See all",
@@ -358,7 +403,7 @@ fun AnalysisCard(title: String, date: String, score: Int, scoreColor: Color, onC
                     text = score.toString(),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextDarkMaroon
+                    color = TextNavyBlue
                 )
             }
         }
@@ -369,7 +414,7 @@ fun AnalysisCard(title: String, date: String, score: Int, scoreColor: Color, onC
             text = title,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
-            color = TextDarkMaroon
+            color = TextNavyBlue
         )
         Text(
             text = date,
@@ -389,7 +434,7 @@ fun PromoSection() {
             .clip(RoundedCornerShape(24.dp))
             .background(
                 Brush.horizontalGradient(
-                    colors = listOf(PromoGradientStart, PromoGradientEnd)
+                    colors = listOf(PromoBlueStart, PromoBlueEnd)
                 )
             )
             .padding(24.dp)
@@ -399,7 +444,7 @@ fun PromoSection() {
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = null,
-                    tint = TextDarkMaroon,
+                    tint = TextNavyBlue,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -407,14 +452,14 @@ fun PromoSection() {
                     text = "Unlock Your Best Style",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextDarkMaroon
+                    color = TextNavyBlue
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "AI tips that match your vibe,\npersonality & body type.",
                 fontSize = 12.sp,
-                color = TextDarkMaroon.copy(alpha = 0.8f),
+                color = TextNavyBlue.copy(alpha = 0.8f),
                 lineHeight = 16.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -432,14 +477,14 @@ fun PromoSection() {
                         text = "Upgrade to Pro",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = TextDarkMaroon
+                        color = TextNavyBlue
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         imageVector = Icons.Default.ArrowForward,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
-                        tint = TextDarkMaroon
+                        tint = TextNavyBlue
                     )
                 }
             }
@@ -456,65 +501,89 @@ fun CustomBottomBar(selectedTab: BottomTab, onTabSelected: (BottomTab) -> Unit) 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 24.dp)
             .navigationBarsPadding()
     ) {
         Surface(
-            shape = RoundedCornerShape(32.dp),
+            shape = RectangleShape,
             color = Color.White,
-            shadowElevation = 16.dp,
-            modifier = Modifier.fillMaxWidth().height(80.dp)
+            shadowElevation = 24.dp,
+            modifier = Modifier.fillMaxWidth().height(70.dp).align(Alignment.BottomCenter)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 32.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Home Tab
                 BottomNavItem(
                     label = "Home",
-                    icon = Icons.Default.Home,
+                    icon = Icons.Rounded.Home,
                     isSelected = selectedTab == BottomTab.HOME,
                     selectedColor = BlueAccent,
-                    unselectedColor = GrayIcon,
+                    unselectedColor = Color.Black,
                     selectedBgColor = LightBlueBg,
                     onClick = { onTabSelected(BottomTab.HOME) }
                 )
                 
-                // Create Button
-                Row(
-                    modifier = Modifier
-                        .height(56.dp)
-                        .width(140.dp)
-                        .clip(RoundedCornerShape(28.dp))
-                        .background(
-                            Brush.horizontalGradient(
-                                colors = listOf(Color(0xFF6B7BFF), Color(0xFF4A55FF))
-                            )
-                        )
-                        .clickable { /* Create Action */ },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Create", tint = Color.White)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Create", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                }
-                
                 // Profile Tab (Me)
                 BottomNavItem(
                     label = "Me",
-                    icon = Icons.Default.Person,
+                    icon = Icons.Rounded.Person,
                     isSelected = selectedTab == BottomTab.PROFILE,
                     selectedColor = BlueAccent,
-                    unselectedColor = GrayIcon,
+                    unselectedColor = Color.Black,
                     selectedBgColor = LightBlueBg,
                     onClick = { onTabSelected(BottomTab.PROFILE) }
                 )
             }
         }
+        
+        // Floating Camera Button
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = (-24).dp)
+                .size(64.dp)
+                .clip(CircleShape)
+                .background(Color.White)
+                .border(
+                    width = 3.dp,
+                    brush = Brush.sweepGradient(
+                        colors = listOf(
+                            Color(0xFFFF7A59), // Coral
+                            Color(0xFFFFD54F), // Yellow
+                            Color(0xFF81C784), // Green
+                            Color(0xFF6B7BFF), // Blue
+                            Color(0xFFFF7A59)  // Coral
+                        )
+                    ),
+                    shape = CircleShape
+                )
+                .clickable { /* Camera Action */ },
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(ButtonBlueStart, ButtonBlueEnd)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CameraAlt,
+                    contentDescription = "Camera",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+                
     }
 }
 
@@ -530,9 +599,9 @@ fun BottomNavItem(
 ) {
     Column(
         modifier = Modifier
-            .width(64.dp)
-            .height(64.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .width(80.dp)
+            .height(56.dp)
+            .clip(CircleShape)
             .background(if (isSelected) selectedBgColor else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(4.dp),
@@ -543,9 +612,9 @@ fun BottomNavItem(
             imageVector = icon,
             contentDescription = label,
             tint = if (isSelected) selectedColor else unselectedColor,
-            modifier = Modifier.size(28.dp)
+            modifier = Modifier.size(24.dp)
         )
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(0.dp))
         Text(
             text = label,
             fontSize = 12.sp,

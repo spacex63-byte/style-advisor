@@ -28,7 +28,7 @@ import com.example.styleadvisor.theme.*
 @Composable
 fun AnalysisResultScreen(onBack: () -> Unit) {
     Scaffold(
-        containerColor = BackgroundWarmWhite,
+        containerColor = BackgroundCoolWhite,
         topBar = {
             ResultTopBar(
                 title = "Analysis Result",
@@ -89,7 +89,7 @@ fun ImproveContent() {
             text = "Top Improvements",
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
-            color = TextDarkMaroon
+            color = TextNavyBlue
         )
         Spacer(modifier = Modifier.height(16.dp))
         
@@ -119,7 +119,7 @@ fun ImproveContent() {
             text = "AI Recommended Look",
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
-            color = TextDarkMaroon
+            color = TextNavyBlue
         )
         Spacer(modifier = Modifier.height(16.dp))
         
@@ -141,16 +141,16 @@ fun ImprovementCard(icon: androidx.compose.ui.graphics.vector.ImageVector, title
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(RedPillBg),
+                .background(BluePillBg),
             contentAlignment = Alignment.Center
         ) {
-            Icon(imageVector = icon, contentDescription = null, tint = ScoreTextRed)
+            Icon(imageVector = icon, contentDescription = null, tint = ScoreTextBlue)
         }
         
         Spacer(modifier = Modifier.width(16.dp))
         
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextDarkMaroon)
+            Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextNavyBlue)
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = description, fontSize = 12.sp, color = TextMuted, lineHeight = 16.sp)
         }
@@ -213,7 +213,7 @@ fun AiRecommendedLook() {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = null,
-                    tint = ScoreTextRed,
+                    tint = ScoreTextBlue,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -225,14 +225,14 @@ fun AiRecommendedLook() {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            Text(text = "Your Look", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextDarkMaroon)
-            Text(text = "Upgraded Look", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextDarkMaroon)
+            Text(text = "Your Look", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextNavyBlue)
+            Text(text = "Upgraded Look", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextNavyBlue)
         }
         
         Spacer(modifier = Modifier.height(16.dp))
         
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(ScoreTextRed.copy(alpha = 0.5f)))
+            Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(ScoreTextBlue.copy(alpha = 0.5f)))
             Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(SurfaceVariant))
             Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(SurfaceVariant))
             Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(SurfaceVariant))
@@ -263,7 +263,7 @@ fun ResultTopBar(title: String, onBack: () -> Unit) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = TextDarkMaroon
+                    tint = TextNavyBlue
                 )
             }
         }
@@ -273,7 +273,7 @@ fun ResultTopBar(title: String, onBack: () -> Unit) {
                 text = title,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextDarkMaroon
+                color = TextNavyBlue
             )
         }
         
@@ -314,7 +314,7 @@ fun HeroScoreCard() {
                         CircularProgressIndicator(
                             progress = { 0.86f },
                             modifier = Modifier.fillMaxSize(),
-                            color = ScoreTextRed,
+                            color = ScoreTextBlue,
                             trackColor = Color(0xFFFDECE9),
                             strokeWidth = 10.dp,
                             strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
@@ -327,13 +327,13 @@ fun HeroScoreCard() {
                                 text = "86",
                                 fontSize = 28.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = TextDarkMaroon,
+                                color = TextNavyBlue,
                                 lineHeight = 28.sp
                             )
                             Text(
                                 text = "/100",
                                 fontSize = 14.sp,
-                                color = TextDarkMaroon,
+                                color = TextNavyBlue,
                                 modifier = Modifier.offset(y = (-4).dp)
                             )
                         }
@@ -345,14 +345,14 @@ fun HeroScoreCard() {
                         text = "Great Look! \uD83D\uDD25",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextDarkMaroon,
+                        color = TextNavyBlue,
                         lineHeight = 24.sp
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "You've got a confident and stylish vibe.",
                         fontSize = 12.sp,
-                        color = TextDarkMaroon,
+                        color = TextNavyBlue,
                         lineHeight = 18.sp
                     )
                 }
@@ -403,12 +403,12 @@ fun NewAttributeCard(modifier: Modifier = Modifier, icon: androidx.compose.ui.gr
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = TextDarkMaroon, modifier = Modifier.size(24.dp))
+        Icon(imageVector = icon, contentDescription = null, tint = TextNavyBlue, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextDarkMaroon, textAlign = TextAlign.Center, lineHeight = 14.sp)
+        Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextNavyBlue, textAlign = TextAlign.Center, lineHeight = 14.sp)
         Spacer(modifier = Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(text = score, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextDarkMaroon, modifier = Modifier.alignByBaseline())
+            Text(text = score, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue, modifier = Modifier.alignByBaseline())
             Text(text = "/100", fontSize = 12.sp, color = TextMuted, modifier = Modifier.alignByBaseline())
         }
     }
@@ -424,7 +424,7 @@ fun StyleOverviewCard() {
             .background(Color.White)
             .padding(20.dp)
     ) {
-        Text(text = "Style Overview", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextDarkMaroon)
+        Text(text = "Style Overview", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier
@@ -442,8 +442,8 @@ fun StyleOverviewCard() {
 
 @Composable
 fun PillTag(text: String, isPrimary: Boolean) {
-    val bgColor = if (isPrimary) TextDarkMaroon else Color(0xFFF5F5F5)
-    val textColor = if (isPrimary) Color.White else TextDarkMaroon
+    val bgColor = if (isPrimary) TextNavyBlue else Color(0xFFF5F5F5)
+    val textColor = if (isPrimary) Color.White else TextNavyBlue
     Box(
         modifier = Modifier
             .clip(CircleShape)
@@ -464,7 +464,7 @@ fun BestForCard() {
             .background(Color.White)
             .padding(20.dp)
     ) {
-        Text(text = "Best For", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextDarkMaroon)
+        Text(text = "Best For", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier
@@ -492,10 +492,10 @@ fun BestForItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: St
                 .background(Color(0xFFF5F5F5)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(imageVector = icon, contentDescription = null, tint = TextDarkMaroon, modifier = Modifier.size(18.dp))
+            Icon(imageVector = icon, contentDescription = null, tint = TextNavyBlue, modifier = Modifier.size(18.dp))
         }
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = label, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = TextDarkMaroon, lineHeight = 14.sp)
+        Text(text = label, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = TextNavyBlue, lineHeight = 14.sp)
     }
 }
 
@@ -522,9 +522,9 @@ fun FeedbackCard(isPositive: Boolean, title: String, description: String) {
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextDarkMaroon)
+            Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
             Spacer(modifier = Modifier.height(2.dp))
-            Text(text = description, fontSize = 13.sp, color = TextDarkMaroon, lineHeight = 18.sp)
+            Text(text = description, fontSize = 13.sp, color = TextNavyBlue, lineHeight = 18.sp)
         }
     }
 }

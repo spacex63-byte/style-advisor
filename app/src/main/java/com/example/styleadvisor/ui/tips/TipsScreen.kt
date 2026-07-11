@@ -45,7 +45,7 @@ fun TipsContent() {
                     text = "Style Tips",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextDarkMaroon
+                    color = TextNavyBlue
                 )
                 Text(
                     text = "Expert tips to upgrade your style",
@@ -65,7 +65,7 @@ fun TipsContent() {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = TextDarkMaroon
+                        tint = TextNavyBlue
                     )
                 }
             }
@@ -96,7 +96,7 @@ fun TipsContent() {
             text = "All Tips",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = TextDarkMaroon,
+            color = TextNavyBlue,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         
@@ -156,7 +156,7 @@ fun CategoryChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(if (isSelected) TextDarkMaroon else SurfaceVariant)
+            .background(if (isSelected) TextNavyBlue else SurfaceVariant)
             .clickable { onClick() }
             .padding(horizontal = 20.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center
@@ -205,7 +205,7 @@ fun TipCard(title: String, subtitle: String, category: String, bgCol: Color, txt
                     text = title,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextDarkMaroon,
+                    color = TextNavyBlue,
                     lineHeight = 18.sp,
                     modifier = Modifier.weight(1f)
                 )
@@ -215,7 +215,7 @@ fun TipCard(title: String, subtitle: String, category: String, bgCol: Color, txt
                 Icon(
                     imageVector = Icons.Default.BookmarkBorder,
                     contentDescription = "Bookmark",
-                    tint = TextDarkMaroon,
+                    tint = TextNavyBlue,
                     modifier = Modifier.size(24.dp)
                 )
             }

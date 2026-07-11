@@ -39,7 +39,7 @@ fun HistoryContent() {
                     text = "History",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextDarkMaroon
+                    color = TextNavyBlue
                 )
                 Text(
                     text = "Your past outfit analyses",
@@ -52,7 +52,7 @@ fun HistoryContent() {
                 Icon(
                     imageVector = Icons.Default.FilterList,
                     contentDescription = "Filter",
-                    tint = TextDarkMaroon
+                    tint = TextNavyBlue
                 )
             }
         }
@@ -128,21 +128,21 @@ fun FilterSheetContent(onDismiss: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Filter History", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextDarkMaroon)
+            Text(text = "Filter History", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
             IconButton(
                 onClick = onDismiss,
                 modifier = Modifier
                     .size(36.dp)
                     .background(SurfaceVariant, CircleShape)
             ) {
-                Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.size(20.dp), tint = TextDarkMaroon)
+                Icon(Icons.Default.Close, contentDescription = "Close", modifier = Modifier.size(20.dp), tint = TextNavyBlue)
             }
         }
         
         Spacer(modifier = Modifier.height(24.dp))
         
         // Sort By
-        Text(text = "Sort By", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextDarkMaroon)
+        Text(text = "Sort By", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -161,7 +161,7 @@ fun FilterSheetContent(onDismiss: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         
         // Outfit Style
-        Text(text = "Outfit Style", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextDarkMaroon)
+        Text(text = "Outfit Style", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(12.dp))
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -181,7 +181,7 @@ fun FilterSheetContent(onDismiss: () -> Unit) {
         Spacer(modifier = Modifier.height(24.dp))
         
         // Date Range
-        Text(text = "Date Range", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextDarkMaroon)
+        Text(text = "Date Range", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(12.dp))
         Row(
             modifier = Modifier
@@ -192,9 +192,9 @@ fun FilterSheetContent(onDismiss: () -> Unit) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.DateRange, contentDescription = null, tint = TextDarkMaroon)
+            Icon(Icons.Default.DateRange, contentDescription = null, tint = TextNavyBlue)
             Spacer(modifier = Modifier.width(12.dp))
-            Text(text = "Select Date Range", fontSize = 14.sp, color = TextDarkMaroon, modifier = Modifier.weight(1f))
+            Text(text = "Select Date Range", fontSize = 14.sp, color = TextNavyBlue, modifier = Modifier.weight(1f))
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = TextMuted)
         }
         
@@ -207,7 +207,7 @@ fun FilterSheetContent(onDismiss: () -> Unit) {
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(20.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = TextDarkMaroon)
+            colors = ButtonDefaults.buttonColors(containerColor = TextNavyBlue)
         ) {
             Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
@@ -223,7 +223,7 @@ fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(if (isSelected) TextDarkMaroon else SurfaceVariant)
+            .background(if (isSelected) TextNavyBlue else SurfaceVariant)
             .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
@@ -232,7 +232,7 @@ fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
             text = text,
             fontSize = 14.sp,
             fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-            color = if (isSelected) Color.White else TextDarkMaroon
+            color = if (isSelected) Color.White else TextNavyBlue
         )
     }
 }
@@ -268,7 +268,7 @@ fun HistoryCard(title: String, date: String, score: Int, scoreText: String, scor
                 text = title,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = TextDarkMaroon
+                color = TextNavyBlue
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
@@ -295,7 +295,7 @@ fun HistoryCard(title: String, date: String, score: Int, scoreText: String, scor
                         text = score.toString(),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = TextDarkMaroon
+                        color = TextNavyBlue
                     )
                 }
                 

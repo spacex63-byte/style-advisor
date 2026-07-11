@@ -33,7 +33,7 @@ fun ProfileContent() {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         
         // Header
         Row(
@@ -48,7 +48,7 @@ fun ProfileContent() {
                     text = "Profile",
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextDarkMaroon
+                    color = TextNavyBlue
                 )
                 Text(
                     text = "Manage your style journey",
@@ -68,7 +68,7 @@ fun ProfileContent() {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Settings",
-                        tint = TextDarkMaroon
+                        tint = TextNavyBlue
                     )
                 }
             }
@@ -107,7 +107,7 @@ fun ProfileContent() {
                             .align(Alignment.BottomEnd)
                             .size(24.dp)
                             .clip(CircleShape)
-                            .background(TextDarkMaroon)
+                            .background(TextNavyBlue)
                             .border(2.dp, Color.White, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
@@ -128,7 +128,7 @@ fun ProfileContent() {
                             text = "Tavorian",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = TextDarkMaroon
+                            color = TextNavyBlue
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
@@ -152,7 +152,7 @@ fun ProfileContent() {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(TextDarkMaroon)
+                            .background(TextNavyBlue)
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -210,7 +210,7 @@ fun ProfileContent() {
                     .border(1.dp, SurfaceVariant, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.Checkroom, contentDescription = null, tint = TextDarkMaroon)
+                Icon(Icons.Default.Checkroom, contentDescription = null, tint = TextNavyBlue)
             }
             
             Spacer(modifier = Modifier.width(16.dp))
@@ -220,7 +220,7 @@ fun ProfileContent() {
                     text = "Style Profile",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextDarkMaroon
+                    color = TextNavyBlue
                 )
                 Text(
                     text = "Complete your style profile",
@@ -244,7 +244,7 @@ fun ProfileContent() {
                     text = "85%",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextDarkMaroon
+                    color = TextNavyBlue
                 )
             }
             
@@ -259,7 +259,7 @@ fun ProfileContent() {
             text = "My Overview",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = TextDarkMaroon,
+            color = TextNavyBlue,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         
@@ -284,7 +284,7 @@ fun StatItem(value: String, label: String) {
             text = value,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = TextDarkMaroon
+            color = TextNavyBlue
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
@@ -473,7 +473,7 @@ fun TopStyleCard() {
                 text = "Smart Casual",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextDarkMaroon
+                color = TextNavyBlue
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
@@ -493,7 +493,7 @@ fun TopStyleCard() {
             Icon(
                 imageVector = Icons.Default.Checkroom, // Suit jacket equivalent placeholder
                 contentDescription = null,
-                tint = TextDarkMaroon,
+                tint = TextNavyBlue,
                 modifier = Modifier.size(30.dp)
             )
         }
