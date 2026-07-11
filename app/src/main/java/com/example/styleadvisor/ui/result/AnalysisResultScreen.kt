@@ -30,10 +30,13 @@ fun AnalysisResultScreen(onBack: () -> Unit) {
     Scaffold(
         containerColor = BackgroundCoolWhite,
         topBar = {
-            ResultTopBar(
-                title = "Analysis Result",
-                onBack = onBack
-            )
+            Column(modifier = Modifier.statusBarsPadding()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                ResultTopBar(
+                    title = "Analysis Result",
+                    onBack = onBack
+                )
+            }
         }
     ) { innerPadding ->
         Column(
@@ -245,27 +248,16 @@ fun ResultTopBar(title: String, onBack: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier.size(40.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .size(35.dp)
-                    .clip(CircleShape)
-                    .background(Color.White)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = TextNavyBlue
-                )
-            }
+        IconButton(onClick = onBack) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                tint = TextNavyBlue
+            )
         }
         
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -277,7 +269,7 @@ fun ResultTopBar(title: String, onBack: () -> Unit) {
             )
         }
         
-        Box(modifier = Modifier.size(40.dp))
+        Box(modifier = Modifier.size(48.dp))
     }
 }
 

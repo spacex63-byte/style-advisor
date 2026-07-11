@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -273,6 +274,11 @@ fun ProfileContent() {
         // Top Style Card
         TopStyleCard()
         
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // More Section
+        MoreSection()
+        
         Spacer(modifier = Modifier.height(100.dp))
     }
 }
@@ -497,5 +503,96 @@ fun TopStyleCard() {
                 modifier = Modifier.size(30.dp)
             )
         }
+    }
+}
+
+@Composable
+fun MoreSection() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Text(
+            text = "More",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = TextNavyBlue
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .background(Color.White)
+        ) {
+            MoreItem(
+                icon = Icons.Default.HelpOutline,
+                title = "Help & Support",
+                onClick = { /* TODO */ }
+            )
+            HorizontalDivider(color = Color(0xFFF0F0F0), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+            MoreItem(
+                icon = Icons.Default.StarBorder,
+                title = "Rate Us",
+                onClick = { /* TODO */ }
+            )
+            HorizontalDivider(color = Color(0xFFF0F0F0), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+            MoreItem(
+                icon = Icons.Default.Security,
+                title = "Privacy Policy",
+                onClick = { /* TODO */ }
+            )
+            HorizontalDivider(color = Color(0xFFF0F0F0), thickness = 1.dp, modifier = Modifier.padding(horizontal = 16.dp))
+            MoreItem(
+                icon = Icons.Default.ExitToApp,
+                title = "Logout",
+                titleColor = Color(0xFFFF5722),
+                iconColor = Color(0xFFFF5722),
+                onClick = { /* TODO */ }
+            )
+        }
+    }
+}
+
+@Composable
+fun MoreItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    titleColor: Color = TextNavyBlue,
+    iconColor: Color = TextNavyBlue,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = iconColor,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = title,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = titleColor
+            )
+        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = Color(0xFFA0A0A0),
+            modifier = Modifier.size(20.dp)
+        )
     }
 }

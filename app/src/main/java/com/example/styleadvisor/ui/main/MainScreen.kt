@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.Image
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -46,6 +47,7 @@ import androidx.navigation3.runtime.NavKey
 import com.example.styleadvisor.AnalysisResult
 import com.example.styleadvisor.R
 import com.example.styleadvisor.theme.*
+import androidx.compose.animation.*
 import com.example.styleadvisor.ui.profile.ProfileContent
 
 enum class BottomTab {
@@ -78,9 +80,21 @@ fun MainScreen(
                     bottom = innerPadding.calculateBottomPadding()
                 )
         ) {
-            when (selectedTab) {
-                BottomTab.HOME -> HomeContent(onItemClick)
-                BottomTab.PROFILE -> ProfileContent()
+            AnimatedContent(
+                targetState = selectedTab,
+                transitionSpec = {
+                    if (targetState.ordinal > initialState.ordinal) {
+                        (slideInHorizontally { width -> width } + fadeIn()).togetherWith(slideOutHorizontally { width -> -width } + fadeOut())
+                    } else {
+                        (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(slideOutHorizontally { width -> width } + fadeOut())
+                    }
+                },
+                label = "tab_transition"
+            ) { targetTab ->
+                when (targetTab) {
+                    BottomTab.HOME -> HomeContent(onItemClick)
+                    BottomTab.PROFILE -> ProfileContent()
+                }
             }
         }
     }
@@ -123,14 +137,6 @@ fun TopAppBarSection() {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { }) {
-            Icon(
-                imageVector = Icons.Default.Menu,
-                contentDescription = "Menu",
-                tint = TextNavyBlue
-            )
-        }
-
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "Style",
@@ -600,21 +606,14 @@ fun CustomBottomBar(selectedTab: BottomTab, onTabSelected: (BottomTab) -> Unit) 
                 .align(Alignment.TopCenter)
                 .offset(y = (-24).dp)
                 .size(64.dp)
+                .shadow(
+                    elevation = 16.dp,
+                    shape = CircleShape,
+                    ambientColor = PrimaryBlue,
+                    spotColor = PrimaryBlue
+                )
                 .clip(CircleShape)
                 .background(Color.White)
-                .border(
-                    width = 3.dp,
-                    brush = Brush.sweepGradient(
-                        colors = listOf(
-                            Color(0xFFFF7A59), // Coral
-                            Color(0xFFFFD54F), // Yellow
-                            Color(0xFF81C784), // Green
-                            Color(0xFF6B7BFF), // Blue
-                            Color(0xFFFF7A59)  // Coral
-                        )
-                    ),
-                    shape = CircleShape
-                )
                 .clickable { /* Camera Action */ },
             contentAlignment = Alignment.Center
         ) {
