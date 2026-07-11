@@ -14,17 +14,63 @@ data class ProfileState(
     val name: String = "Tavorian",
     val bio: String = "Style Explorer",
     val profileImageUri: Uri? = null,
-    val analysesCount: Int = 23,
-    val avgScore: Int = 87,
-    val outfitIdeas: Int = 12,
-    val styleProfileProgress: Float = 0.85f,
-    val topStyle: String = "Smart Casual",
-    val recentScores: List<Float> = listOf(0.7f, 0.65f, 0.45f, 0.48f, 0.25f)
+    val analysesCount: Int = 0,
+    val avgScore: Int = 0,
+    val outfitIdeas: Int = 0,
+    val styleProfileProgress: Float = 0.0f,
+    val topStyle: String = "Unknown",
+    val recentScores: List<Float> = listOf(0f, 0f, 0f, 0f, 0f)
 )
 
 class ProfileViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileState())
     val uiState: StateFlow<ProfileState> = _uiState
+
+    init {
+        viewModelScope.launch {
+            com.example.styleadvisor.data.AnalysisRepository.history.collect { historyList ->
+                if (historyList.isNotEmpty()) {
+                    val count = historyList.size
+                    val avg = historyList.map { it.result.overallScore }.average().toInt()
+                    val ideas = historyList.flatMap { it.result.styleTags }.distinct().size
+                    
+                    // Create a list of recent scores (max 5) scaled to 0.0f - 1.0f for the chart
+                    // The chart expects values left-to-right (oldest to newest), but historyList is newest first.
+                    // So we take up to 5, and reverse it.
+                    val rawRecent = historyList.take(5).reversed().map { it.result.overallScore / 100f }
+                    // Pad to 5 items to prevent IndexOutOfBounds in the graph
+                    val recent = if (rawRecent.size < 5) {
+                        MutableList(5 - rawRecent.size) { 0f } + rawRecent
+                    } else {
+                        rawRecent
+                    }
+                    
+                    // Top style (most frequent style tag)
+                    val allTags = historyList.flatMap { it.result.styleTags }
+                    val top = allTags.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: "Unknown"
+
+                    _uiState.value = _uiState.value.copy(
+                        analysesCount = count,
+                        avgScore = avg,
+                        outfitIdeas = ideas,
+                        recentScores = recent,
+                        topStyle = top,
+                        styleProfileProgress = (count / 10f).coerceAtMost(1.0f) // Arbitrary progress logic based on scans
+                    )
+                } else {
+                    // Reset to zero if history is cleared
+                    _uiState.value = _uiState.value.copy(
+                        analysesCount = 0,
+                        avgScore = 0,
+                        outfitIdeas = 0,
+                        recentScores = listOf(0f, 0f, 0f, 0f, 0f),
+                        topStyle = "Unknown",
+                        styleProfileProgress = 0.0f
+                    )
+                }
+            }
+        }
+    }
 
     fun updateProfile(name: String, bio: String) {
         _uiState.value = _uiState.value.copy(name = name, bio = bio)

@@ -74,6 +74,15 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}, viewModel: ProfileViewMod
                     OutlinedTextField(value = newName, onValueChange = { newName = it }, label = { Text("Name") })
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(value = newBio, onValueChange = { newBio = it }, label = { Text("Bio") })
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextButton(
+                        onClick = { launcher.launch("image/*") },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(imageVector = Icons.Default.CameraAlt, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Change Profile Photo")
+                    }
                 }
             },
             confirmButton = {
@@ -202,25 +211,18 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}, viewModel: ProfileViewMod
                 
                 Box(
                     modifier = Modifier
+                        .size(36.dp)
                         .clip(CircleShape)
-                        .background(TextNavyBlue)
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .background(SurfaceVariant)
+                        .clickable { showEditDialog = true },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            tint = Color(0xFFFFD54F),
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Premium",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Profile",
+                        tint = TextNavyBlue,
+                        modifier = Modifier.size(18.dp)
+                    )
                 }
             }
             

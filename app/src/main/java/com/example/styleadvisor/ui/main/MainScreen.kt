@@ -74,6 +74,35 @@ fun MainScreen(
     var selectedTab by remember { mutableStateOf(BottomTab.HOME) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isAnalyzing by remember { mutableStateOf(false) }
+    var isAnimationFinished by remember { mutableStateOf(false) }
+    
+    val uiState by (viewModel?.uiState ?: kotlinx.coroutines.flow.MutableStateFlow(AnalysisState.Idle)).collectAsState()
+
+    LaunchedEffect(isAnimationFinished, uiState) {
+        if (uiState is AnalysisState.Error) {
+            isAnalyzing = false
+        } else if (isAnimationFinished && (uiState is AnalysisState.Success || uiState is AnalysisState.Analyzing)) {
+            isAnalyzing = false
+            onItemClick(AnalysisResult)
+            isAnimationFinished = false
+        }
+    }
+    
+    if (uiState is AnalysisState.Error) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { viewModel?.reset() },
+            title = { androidx.compose.material3.Text("Analysis Failed", fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) },
+            text = { androidx.compose.material3.Text((uiState as AnalysisState.Error).message) },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = { viewModel?.reset() }) {
+                    androidx.compose.material3.Text("OK", color = Color(0xFF1E88E5))
+                }
+            },
+            containerColor = Color.White,
+            titleContentColor = Color.Black,
+            textContentColor = Color.DarkGray
+        )
+    }
     
     val context = LocalContext.current
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -84,6 +113,8 @@ fun MainScreen(
             if (success && tempImageUri != null) {
                 selectedImageUri = tempImageUri
                 isAnalyzing = true
+                isAnimationFinished = false
+                viewModel?.analyzeImage(context, tempImageUri!!, false)
             }
         }
     )
@@ -141,15 +172,15 @@ fun MainScreen(
                         selectedImageUri = selectedImageUri,
                         onImageSelected = { selectedImageUri = it },
                         isAnalyzing = isAnalyzing,
-                        onAnalyzeStarted = { 
-                            isAnalyzing = true
+                        onAnalyzeStarted = { isSample -> 
                             selectedImageUri?.let { uri ->
-                                viewModel?.analyzeImage(context, uri)
+                                viewModel?.analyzeImage(context, uri, isSample)
+                                isAnalyzing = true
+                                isAnimationFinished = false
                             }
                         },
                         onAnalyzeComplete = {
-                            isAnalyzing = false
-                            onItemClick(AnalysisResult)
+                            isAnimationFinished = true
                         }
                     )
                     BottomTab.PROFILE -> {
@@ -167,7 +198,7 @@ fun HomeContent(
     selectedImageUri: Uri?,
     onImageSelected: (Uri?) -> Unit,
     isAnalyzing: Boolean,
-    onAnalyzeStarted: () -> Unit,
+    onAnalyzeStarted: (Boolean) -> Unit,
     onAnalyzeComplete: () -> Unit
 ) {
     Column(
@@ -192,7 +223,9 @@ fun HomeContent(
         )
         
         Spacer(modifier = Modifier.height(20.dp))
-        RecentAnalysesSection(onItemClick = onItemClick)
+        
+        val history by com.example.styleadvisor.data.AnalysisRepository.history.collectAsState()
+        RecentAnalysesSection(history = history, onItemClick = onItemClick)
         
         Spacer(modifier = Modifier.height(32.dp))
         PromoSection()
@@ -266,7 +299,7 @@ fun AnalyzeButtonSection(
     selectedImageUri: Uri?,
     onImageSelected: (Uri?) -> Unit,
     isAnalyzing: Boolean,
-    onAnalyzeStarted: () -> Unit,
+    onAnalyzeStarted: (Boolean) -> Unit,
     onAnalyzeComplete: () -> Unit
 ) {
     val context = LocalContext.current
@@ -277,7 +310,7 @@ fun AnalyzeButtonSection(
         onResult = { uri -> 
             if (uri != null) {
                 onImageSelected(uri)
-                onAnalyzeStarted()
+                onAnalyzeStarted(false)
             }
         }
     )
@@ -287,7 +320,7 @@ fun AnalyzeButtonSection(
         onResult = { success ->
             if (success && tempImageUri != null) {
                 onImageSelected(tempImageUri)
-                onAnalyzeStarted()
+                onAnalyzeStarted(false)
             }
         }
     )
@@ -337,7 +370,13 @@ fun AnalyzeButtonSection(
                 )
                 
                 // Scanning Line Animation
-                val infiniteTransition = rememberInfiniteTransition(label = "scan")
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = isAnalyzing,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        val infiniteTransition = rememberInfiniteTransition(label = "scan")
                 val scanLineY by infiniteTransition.animateFloat(
                     initialValue = 0f,
                     targetValue = 1f,
@@ -448,6 +487,8 @@ fun AnalyzeButtonSection(
                         )
                     }
                 }
+                    }
+                }
                 
                 // AI Analyzing Container Overlaid at the bottom of the image
                 Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) {
@@ -510,51 +551,7 @@ fun AnalyzeButtonSection(
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // Upload Photo Button
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .clip(RoundedCornerShape(30.dp))
-                .background(TextNavyBlue)
-                .clickable { permissionLauncher.launch(android.Manifest.permission.CAMERA) },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.CameraAlt,
-                contentDescription = "Take Photo",
-                tint = Color.White,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = "Take Photo",
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Or divider
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray.copy(alpha = 0.5f))
-            Text(
-                text = "or",
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = TextNavyBlue,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
-            HorizontalDivider(modifier = Modifier.weight(1f), color = Color.LightGray.copy(alpha = 0.5f))
-        }
+
         
         Spacer(modifier = Modifier.height(16.dp))
         
@@ -564,19 +561,20 @@ fun AnalyzeButtonSection(
                 .fillMaxWidth()
                 .height(60.dp)
                 .clip(RoundedCornerShape(30.dp))
+                .background(Brush.horizontalGradient(listOf(Color(0xFFE3F2FD), Color.White)))
                 .border(1.dp, Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(30.dp))
                 .clickable {
                     val uri = android.net.Uri.parse("android.resource://${context.packageName}/${com.example.styleadvisor.R.drawable.sample_outfit}")
                     onImageSelected(uri)
-                    onAnalyzeStarted()
+                    onAnalyzeStarted(true)
                 },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
             Icon(
-                imageVector = Icons.Default.Checkroom,
+                painter = painterResource(id = R.drawable.ic_cloth),
                 contentDescription = "Sample",
-                tint = TextNavyBlue,
+                tint = Color.Black,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -591,7 +589,7 @@ fun AnalyzeButtonSection(
 }
 
 @Composable
-fun RecentAnalysesSection(onItemClick: (NavKey) -> Unit) {
+fun RecentAnalysesSection(history: List<com.example.styleadvisor.data.HistoryItem>, onItemClick: (NavKey) -> Unit) {
     Column {
         Row(
             modifier = Modifier
@@ -618,19 +616,32 @@ fun RecentAnalysesSection(onItemClick: (NavKey) -> Unit) {
                 .padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            AnalysisCard("Smart Casual", "2 May 2025", 86, ScoreHigh, onClick = { onItemClick(AnalysisResult) })
-            AnalysisCard("Casual Day Out", "30 Apr 2025", 92, ScoreHigh, onClick = { onItemClick(AnalysisResult) })
-            AnalysisCard("Evening Look", "28 Apr 2025", 78, ScoreMedium, onClick = { onItemClick(AnalysisResult) })
-            AnalysisCard("Office Wear", "22 Apr 2025", 88, ScoreHigh, onClick = { onItemClick(AnalysisResult) })
-            AnalysisCard("Weekend Chill", "18 Apr 2025", 71, ScoreMedium, onClick = { onItemClick(AnalysisResult) })
-            AnalysisCard("Party Fit", "10 Apr 2025", 65, ScoreMedium, onClick = { onItemClick(AnalysisResult) })
-            AnalysisCard("Winter Coat", "5 Apr 2025", 45, ScoreLow, onClick = { onItemClick(AnalysisResult) })
+            if (history.isEmpty()) {
+                Text("No recent analyses yet.", color = TextMuted, fontSize = 14.sp)
+            } else {
+                history.forEach { item ->
+                    val scoreColor = when {
+                        item.result.overallScore >= 80 -> ScoreHigh
+                        item.result.overallScore >= 60 -> ScoreMedium
+                        else -> ScoreLow
+                    }
+                    val dateStr = java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(item.timestamp))
+                    AnalysisCard(
+                        title = item.result.shortTitle, 
+                        date = dateStr, 
+                        score = item.result.overallScore, 
+                        scoreColor = scoreColor, 
+                        imageUri = item.imageUri,
+                        onClick = { onItemClick(AnalysisResult) }
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun AnalysisCard(title: String, date: String, score: Int, scoreColor: Color, onClick: () -> Unit) {
+fun AnalysisCard(title: String, date: String, score: Int, scoreColor: Color, imageUri: String? = null, onClick: () -> Unit) {
     Column(modifier = Modifier.clickable { onClick() }) {
         Box(
             modifier = Modifier
@@ -639,12 +650,21 @@ fun AnalysisCard(title: String, date: String, score: Int, scoreColor: Color, onC
                 .clip(RoundedCornerShape(16.dp))
                 .background(SurfaceVariant)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.hero_fashion_man),
-                contentDescription = "Analysis Photo",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
+            if (imageUri != null) {
+                AsyncImage(
+                    model = android.net.Uri.parse(imageUri),
+                    contentDescription = "Analysis Photo",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.hero_fashion_man),
+                    contentDescription = "Analysis Photo",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
             
             Box(
                 modifier = Modifier

@@ -30,40 +30,34 @@ class AnalysisViewModel : ViewModel() {
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     val selectedImageUri: StateFlow<Uri?> = _selectedImageUri
     
-    fun analyzeImage(context: Context, uri: Uri) {
+    fun analyzeImage(context: Context, uri: Uri, isSample: Boolean = false) {
         _selectedImageUri.value = uri
+        
+        if (isSample) {
+            val mockResult = com.example.styleadvisor.model.AnalysisResult(
+                overallScore = 92,
+                colorHarmonyScore = 95,
+                fitScore = 88,
+                styleScore = 94,
+                shortTitle = "Perfectly Preppy",
+                shortDescription = "Vibrant blue patterned shirt with structured layers creates a fantastic, balanced look.",
+                primaryClothingItem = "Blue Patterned Shirt",
+                styleTags = listOf("Preppy", "Smart Casual", "Artsy"),
+                bestForOccasions = listOf("Weekend Brunch", "Casual Outing", "Date Night"),
+                whatLooksBest = "The bold blue pattern is the star of the show. It pairs excellently with solid neutrals.",
+                whatCouldImprove = "Ensure the jacket sleeves are tailored to show just a quarter inch of the shirt cuff.",
+                outfitElements = listOf("Blue Patterned Button-Down", "Neutral Jacket"),
+                detectedColors = listOf("#1E88E5", "#F5F5F5", "#212121"),
+                colorsDescription = "Vibrant blue anchors the outfit, accented by clean whites and dark neutrals."
+            )
+            com.example.styleadvisor.data.AnalysisRepository.addResult(mockResult, uri.toString())
+            _uiState.value = AnalysisState.Success(mockResult)
+            return
+        }
+        
         _uiState.value = AnalysisState.Analyzing
         viewModelScope.launch {
             try {
-                val USE_REAL_API = false // Set to true when ready to use the actual API again
-                
-                // If it is the sample image or we are testing UI, return a mock response to save money
-                if (!USE_REAL_API || uri.toString().contains("android.resource")) {
-                    kotlinx.coroutines.delay(1000) // Simulate network delay
-                    val mockResult = AnalysisResult(
-                        overallScore = 88,
-                        colorHarmonyScore = 92,
-                        fitScore = 85,
-                        styleScore = 89,
-                        shortTitle = "Smart Casual / Urban Chic",
-                        shortDescription = "Neutral tones with a sophisticated contrast",
-                        styleTags = listOf("Smart Casual", "Monochrome", "Layered"),
-                        bestForOccasions = listOf("Coffee dates", "Casual Fridays", "City strolling"),
-                        whatLooksBest = "The layered jacket over the casual tee creates a relaxed but put-together silhouette.",
-                        whatCouldImprove = "Add a subtle silver chain or watch, or try a slightly brighter inner shirt for pop.",
-                        outfitElements = listOf("Black T-Shirt", "Brown Jacket", "Gray Joggers", "Clear Glasses", "Casual Look"),
-                        detectedColors = listOf("#1A202C", "#B07D5A", "#8B8B8B", "#E8D3E3", "#FFFFFF"),
-                        colorsDescription = "Neutral and balanced tones.",
-                        personalizedTips = listOf(
-                            com.example.styleadvisor.model.Tip("Accessorize Smartly", "A watch or chain will elevate\nyour overall look."),
-                            com.example.styleadvisor.model.Tip("Play With Layers", "Try adding a light shirt or hoodie\nunder the jacket."),
-                            com.example.styleadvisor.model.Tip("Footwear Upgrade", "Clean sneakers or loafers will\ncomplete the vibe.")
-                        )
-                    )
-                    _uiState.value = AnalysisState.Success(mockResult)
-                    return@launch
-                }
-                
                 val bitmap = loadBitmap(context, uri)
                 if (bitmap == null) {
                     _uiState.value = AnalysisState.Error("Failed to load image")
@@ -74,6 +68,7 @@ class AnalysisViewModel : ViewModel() {
                 val scaledBitmap = scaleBitmap(bitmap, 800)
                 
                 val result = aiService.analyzeOutfit(scaledBitmap)
+                com.example.styleadvisor.data.AnalysisRepository.addResult(result, uri.toString())
                 _uiState.value = AnalysisState.Success(result)
             } catch (e: Exception) {
                 _uiState.value = AnalysisState.Error(e.message ?: "Unknown error occurred")
@@ -83,6 +78,7 @@ class AnalysisViewModel : ViewModel() {
     
     fun reset() {
         _uiState.value = AnalysisState.Idle
+        _selectedImageUri.value = null
     }
     
     private fun loadBitmap(context: Context, uri: Uri): Bitmap? {

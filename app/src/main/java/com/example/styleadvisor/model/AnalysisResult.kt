@@ -16,6 +16,7 @@ data class AnalysisResult(
     val styleScore: Int, // 0-100
     val shortTitle: String, // e.g. "Great Look! 🔥"
     val shortDescription: String,
+    val primaryClothingItem: String = "Outfit", // e.g. "Blue Jacket"
     val styleTags: List<String>, // e.g. ["Smart Casual", "Minimal"]
     val bestForOccasions: List<String>, // e.g. ["Date Night", "Travel"]
     val whatLooksBest: String,

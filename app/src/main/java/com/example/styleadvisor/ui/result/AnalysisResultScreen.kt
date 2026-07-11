@@ -22,6 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,10 +60,27 @@ fun AnalysisResultScreen(
             when (val state = uiState) {
                 is AnalysisState.Analyzing -> {
                     Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        if (imageUri != null) {
+                            AsyncImage(
+                                model = coil.request.ImageRequest.Builder(LocalContext.current)
+                                    .data(imageUri)
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = "Analyzing Image",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop,
+                                alpha = 0.4f
+                            )
+                        }
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier
+                                .background(Color.White.copy(alpha = 0.85f), RoundedCornerShape(16.dp))
+                                .padding(24.dp)
+                        ) {
                             CircularProgressIndicator(color = PrimaryBlue)
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("AI is analyzing your style...", color = TextNavyBlue, fontSize = 16.sp)
+                            Text("AI is analyzing your photo...", color = TextNavyBlue, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -76,8 +95,8 @@ fun AnalysisResultScreen(
                     }
                 }
                 is AnalysisState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize().padding(innerPadding), contentAlignment = Alignment.Center) {
-                        Text(text = "Error: ${state.message}", color = Color.Red)
+                    LaunchedEffect(Unit) {
+                        onBack()
                     }
                 }
                 else -> {}
@@ -374,19 +393,12 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
             Spacer(modifier = Modifier.height(12.dp))
             
             Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
-                val score = result.overallScore
-                val statusText = when {
-                    score >= 85 -> "Great Look! 🔥"
-                    score >= 70 -> "Looking Good 👍"
-                    score >= 50 -> "Not Bad 😐"
-                    else -> "Needs Work 😢"
-                }
-                
                 Text(
-                    text = statusText,
-                    fontSize = 16.sp,
+                    text = result.shortTitle,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextNavyBlue
+                    color = TextNavyBlue,
+                    lineHeight = 24.sp
                 )
                 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -395,26 +407,11 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                     text = result.shortDescription,
                     fontSize = 12.sp,
                     color = TextNavyBlue,
-                    lineHeight = 14.sp
+                    lineHeight = 16.sp,
+                    maxLines = 3,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
                 
-                Spacer(modifier = Modifier.height(10.dp))
-                
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(30.dp))
-                        .background(Color(0xFFE3F2FD))
-                        .padding(horizontal = 6.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = result.shortTitle, 
-                        fontSize = 11.sp, 
-                        color = PrimaryBlue, 
-                        fontWeight = FontWeight.Medium,
-                        lineHeight = 14.sp,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                    )
-                }
             }
         }
         
@@ -547,37 +544,73 @@ fun BestForCard(occasions: List<String>) {
         Text(text = "Best For", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(20.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             val iconMap = mapOf(
                 "Casual Outing" to Icons.Default.Coffee,
                 "Date Night" to Icons.Default.FavoriteBorder,
+                "Office/Work" to Icons.Default.Work,
+                "Party" to Icons.Default.LocalBar,
+                "Formal Event" to Icons.Default.Event,
+                "Workout/Gym" to Icons.Default.FitnessCenter,
                 "Travel" to Icons.Default.Flight,
-                "College" to Icons.Default.School,
-                "Work" to Icons.Default.Work,
-                "Party" to Icons.Default.LocalBar
+                "Weekend Brunch" to Icons.Default.BrunchDining,
+                "Beach/Resort" to Icons.Default.BeachAccess,
+                "Wedding Guest" to Icons.Default.Celebration,
+                "Concert/Festival" to Icons.Default.MusicNote,
+                "Lounging at Home" to Icons.Default.Home,
+                "Interview" to Icons.Default.CoPresent,
+                "Night Club" to Icons.Default.Nightlife,
+                "Outdoor Adventure" to Icons.Default.Terrain,
+                "School/College" to Icons.Default.School
             )
+            
             occasions.take(3).forEach { occasion ->
-                BestForItem(icon = iconMap[occasion] ?: Icons.Default.Check, label = occasion)
+                val icon = iconMap[occasion] ?: Icons.Default.Check
+                BestForItem(icon = icon, label = occasion, isSelected = true)
             }
         }
     }
 }
 
 @Composable
-fun BestForItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String) {
+fun BestForItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, isSelected: Boolean) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(72.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(Color(0xFFE3F2FD)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(imageVector = icon, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(24.dp))
+        Box {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFE3F2FD)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = icon, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(24.dp))
+            }
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(16.dp)
+                        .offset(x = (-2).dp, y = 2.dp)
+                        .clip(CircleShape)
+                        .background(PrimaryBlue)
+                        .border(1.dp, Color.White, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Selected",
+                        tint = Color.White,
+                        modifier = Modifier.size(10.dp)
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -585,7 +618,7 @@ fun BestForItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: St
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             color = TextNavyBlue,
-            lineHeight = 16.sp,
+            lineHeight = 14.sp,
             textAlign = TextAlign.Center
         )
     }
