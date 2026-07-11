@@ -7,3 +7,4 @@ import kotlinx.serialization.Serializable
 @Serializable data object AnalysisResult : NavKey
 @Serializable data object HelpSupport : NavKey
 @Serializable data object PrivacyPolicy : NavKey
+@Serializable data object StyleProfile : NavKey

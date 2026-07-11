@@ -58,6 +58,7 @@ import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.styleadvisor.ui.profile.ProfileContent
+import com.example.styleadvisor.ui.profile.ProfileViewModel
 
 enum class BottomTab {
     HOME, PROFILE
@@ -67,7 +68,8 @@ enum class BottomTab {
 fun MainScreen(
     onItemClick: (NavKey) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: AnalysisViewModel? = null
+    viewModel: AnalysisViewModel? = null,
+    profileViewModel: ProfileViewModel? = null
 ) {
     var selectedTab by remember { mutableStateOf(BottomTab.HOME) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -150,7 +152,9 @@ fun MainScreen(
                             onItemClick(AnalysisResult)
                         }
                     )
-                    BottomTab.PROFILE -> ProfileContent(onItemClick = onItemClick)
+                    BottomTab.PROFILE -> {
+                        profileViewModel?.let { ProfileContent(onItemClick = onItemClick, viewModel = it) }
+                    }
                 }
             }
         }

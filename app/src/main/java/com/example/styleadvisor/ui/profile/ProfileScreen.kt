@@ -43,8 +43,48 @@ import com.example.styleadvisor.PrivacyPolicy
 import com.example.styleadvisor.theme.*
 import com.example.styleadvisor.R
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import coil.compose.AsyncImage
+
 @Composable
-fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
+fun ProfileContent(onItemClick: (NavKey) -> Unit = {}, viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
+    val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    var showEditDialog by remember { mutableStateOf(false) }
+    
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { viewModel.updateProfileImage(context, it) }
+    }
+    
+    LaunchedEffect(Unit) {
+        viewModel.loadProfileImage(context)
+    }
+
+    if (showEditDialog) {
+        var newName by remember { mutableStateOf(state.name) }
+        var newBio by remember { mutableStateOf(state.bio) }
+        AlertDialog(
+            onDismissRequest = { showEditDialog = false },
+            title = { Text("Edit Profile") },
+            text = {
+                Column {
+                    OutlinedTextField(value = newName, onValueChange = { newName = it }, label = { Text("Name") })
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(value = newBio, onValueChange = { newBio = it }, label = { Text("Bio") })
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.updateProfile(newName, newBio)
+                    showEditDialog = false
+                }) { Text("Save") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showEditDialog = false }) { Text("Cancel") }
+            }
+        )
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -90,19 +130,28 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Avatar with Camera Badge
-                Box {
+                Box(modifier = Modifier.clickable { launcher.launch("image/*") }) {
                     Box(
                         modifier = Modifier
                             .size(60.dp)
                             .clip(CircleShape)
                             .background(SurfaceVariant)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            modifier = Modifier.align(Alignment.Center).size(48.dp),
-                            tint = TextMuted.copy(alpha = 0.3f)
-                        )
+                        if (state.profileImageUri != null) {
+                            AsyncImage(
+                                model = state.profileImageUri,
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = null,
+                                modifier = Modifier.align(Alignment.Center).size(48.dp),
+                                tint = TextMuted.copy(alpha = 0.3f)
+                            )
+                        }
                     }
                     
                     Box(
@@ -125,10 +174,10 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
                 
                 Spacer(modifier = Modifier.width(20.dp))
                 
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f).clickable { showEditDialog = true }) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "Tavorian",
+                            text = state.name,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextNavyBlue
@@ -143,7 +192,7 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
                     }
                     
                     Text(
-                        text = "Style Explorer",
+                        text = state.bio,
                         fontSize = 12.sp,
                         color = TextMuted
                     )
@@ -182,11 +231,11 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                StatItem("23", "Analyses")
+                StatItem(state.analysesCount.toString(), "Analyses")
                 VerticalDivider(modifier = Modifier.height(32.dp), color = SurfaceVariant, thickness = 1.dp)
-                StatItem("87", "Avg. Score")
+                StatItem(state.avgScore.toString(), "Avg. Score")
                 VerticalDivider(modifier = Modifier.height(32.dp), color = SurfaceVariant, thickness = 1.dp)
-                StatItem("12", "Outfit Ideas")
+                StatItem(state.outfitIdeas.toString(), "Outfit Ideas")
             }
         }
         
@@ -200,6 +249,7 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
                 .padding(horizontal = 16.dp)
                 .clip(RoundedCornerShape(24.dp))
                 .background(Color(0xFFF0F4FF))
+                .clickable { onItemClick(com.example.styleadvisor.StyleProfile) }
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -243,14 +293,15 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    progress = { 0.85f },
+                    progress = { state.styleProfileProgress },
                     modifier = Modifier.fillMaxSize(),
                     color = ScoreHigh,
                     strokeWidth = 3.dp,
-                    trackColor = SurfaceVariant
+                    trackColor = SurfaceVariant,
+                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                 )
                 Text(
-                    text = "85%",
+                    text = "${(state.styleProfileProgress * 100).toInt()}%",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextNavyBlue
@@ -275,12 +326,12 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
         Spacer(modifier = Modifier.height(16.dp))
         
         // Graph Card
-        GraphCard()
+        GraphCard(state)
         
         Spacer(modifier = Modifier.height(16.dp))
         
         // Top Style Card
-        TopStyleCard()
+        TopStyleCard(state)
         
         Spacer(modifier = Modifier.height(24.dp))
         

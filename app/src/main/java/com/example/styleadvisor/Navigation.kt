@@ -16,11 +16,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.styleadvisor.ui.main.AnalysisViewModel
 import com.example.styleadvisor.ui.profile.HelpSupportScreen
 import com.example.styleadvisor.ui.profile.PrivacyPolicyScreen
+import com.example.styleadvisor.ui.profile.StyleProfileScreen
+import com.example.styleadvisor.ui.profile.ProfileViewModel
 
 @Composable
 fun MainNavigation() {
   val backStack = rememberNavBackStack(Main)
   val analysisViewModel: AnalysisViewModel = viewModel()
+  val profileViewModel: ProfileViewModel = viewModel()
 
   NavDisplay(
     backStack = backStack,
@@ -30,7 +33,7 @@ fun MainNavigation() {
     entryProvider =
       entryProvider {
         entry<Main> {
-          MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier, viewModel = analysisViewModel)
+          MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier, viewModel = analysisViewModel, profileViewModel = profileViewModel)
         }
         entry<AnalysisResult> {
           com.example.styleadvisor.ui.result.AnalysisResultScreen(onBack = { backStack.removeLastOrNull() }, viewModel = analysisViewModel)
@@ -40,6 +43,9 @@ fun MainNavigation() {
         }
         entry<PrivacyPolicy> {
           PrivacyPolicyScreen(onBack = { backStack.removeLastOrNull() })
+        }
+        entry<StyleProfile> {
+          StyleProfileScreen(onBack = { backStack.removeLastOrNull() }, viewModel = profileViewModel)
         }
       },
   )
