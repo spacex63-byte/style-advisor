@@ -488,7 +488,7 @@ fun PromoSection() {
             .clip(RoundedCornerShape(24.dp))
             .background(
                 Brush.horizontalGradient(
-                    colors = listOf(PromoGradientStart, PromoGradientEnd)
+                    colors = listOf(PromoPopStart, PromoPopEnd)
                 )
             )
             .padding(24.dp)
@@ -498,7 +498,7 @@ fun PromoSection() {
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = null,
-                    tint = TextNavyBlue,
+                    tint = Color.White,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
@@ -506,21 +506,21 @@ fun PromoSection() {
                     text = "Unlock Your Best Style",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextNavyBlue
+                    color = Color.White
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "AI tips that match your vibe,\npersonality & body type.",
                 fontSize = 12.sp,
-                color = TextNavyBlue.copy(alpha = 0.8f),
+                color = Color.White.copy(alpha = 0.85f),
                 lineHeight = 16.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
             
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = Color.White.copy(alpha = 0.7f),
+                color = Color.White,
                 modifier = Modifier.wrapContentSize()
             ) {
                 Row(

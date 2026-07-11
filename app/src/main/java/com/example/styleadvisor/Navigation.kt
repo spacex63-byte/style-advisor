@@ -10,12 +10,16 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.styleadvisor.ui.main.MainScreen
 
+import androidx.compose.animation.*
+
 @Composable
 fun MainNavigation() {
   val backStack = rememberNavBackStack(Main)
 
   NavDisplay(
     backStack = backStack,
+    transitionSpec = { slideInHorizontally { it } togetherWith slideOutHorizontally { -it } },
+    popTransitionSpec = { slideInHorizontally { -it } togetherWith slideOutHorizontally { it } },
     onBack = { backStack.removeLastOrNull() },
     entryProvider =
       entryProvider {
