@@ -91,7 +91,7 @@ fun OverviewContent(result: AnalysisResult, imageUri: Uri?) {
         Spacer(modifier = Modifier.height(16.dp))
         HeroScoreCard(result = result, imageUri = imageUri)
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         NewAttributeGrid(result = result)
         
         Spacer(modifier = Modifier.height(16.dp))
@@ -329,7 +329,7 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .height(220.dp),
+            .height(260.dp),
         horizontalArrangement = Arrangement.spacedBy(0.dp)
     ) {
         // Left Column: Score and text
@@ -337,7 +337,7 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .clip(RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 0.dp, bottomEnd = 0.dp))
                 .background(Color.White)
                 .padding(16.dp),
             verticalArrangement = Arrangement.Top
@@ -379,10 +379,10 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
             
             Text(
                 text = result.shortTitle,
-                fontSize = 16.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextNavyBlue,
-                lineHeight = 20.sp
+                lineHeight = 16.sp
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -412,7 +412,7 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .clip(RoundedCornerShape(24.dp))
+                .clip(RoundedCornerShape(topStart = 0.dp, bottomStart = 0.dp, topEnd = 24.dp, bottomEnd = 24.dp))
                 .background(SurfaceVariant)
         ) {
             if (imageUri != null) {
@@ -492,9 +492,9 @@ fun StyleOverviewCard(tags: List<String>) {
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(Color.White)
-            .padding(20.dp)
+            .padding(16.dp)
     ) {
-        Text(text = "Style Overview", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
+        Text(text = "Style Overview", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(16.dp))
         Row(
             modifier = Modifier
@@ -517,9 +517,9 @@ fun PillTag(text: String, isPrimary: Boolean) {
         modifier = Modifier
             .clip(CircleShape)
             .background(bgColor)
-            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
-        Text(text = text, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = textColor)
+        Text(text = text, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = textColor)
     }
 }
 
