@@ -137,25 +137,15 @@ fun MainScreen(
                         onItemClick = onItemClick,
                         selectedImageUri = selectedImageUri,
                         onImageSelected = { selectedImageUri = it },
-                        onAnalyzeStarted = { isAnalyzing = true }
+                        isAnalyzing = isAnalyzing,
+                        onAnalyzeStarted = { isAnalyzing = true },
+                        onAnalyzeComplete = {
+                            isAnalyzing = false
+                            onItemClick(AnalysisResult)
+                        }
                     )
                     BottomTab.PROFILE -> ProfileContent()
                 }
-            }
-            
-            // AI Analyzing Container
-            AnimatedVisibility(
-                visible = isAnalyzing,
-                enter = slideInVertically { it } + fadeIn(),
-                exit = slideOutVertically { it } + fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                AIAnalyzingContainer(
-                    onComplete = {
-                        isAnalyzing = false
-                        onItemClick(AnalysisResult)
-                    }
-                )
             }
         }
     }
@@ -166,7 +156,9 @@ fun HomeContent(
     onItemClick: (NavKey) -> Unit,
     selectedImageUri: Uri?,
     onImageSelected: (Uri?) -> Unit,
-    onAnalyzeStarted: () -> Unit
+    isAnalyzing: Boolean,
+    onAnalyzeStarted: () -> Unit,
+    onAnalyzeComplete: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -184,7 +176,9 @@ fun HomeContent(
         AnalyzeButtonSection(
             selectedImageUri = selectedImageUri,
             onImageSelected = onImageSelected,
-            onAnalyzeStarted = onAnalyzeStarted
+            isAnalyzing = isAnalyzing,
+            onAnalyzeStarted = onAnalyzeStarted,
+            onAnalyzeComplete = onAnalyzeComplete
         )
         
         Spacer(modifier = Modifier.height(20.dp))
@@ -261,7 +255,9 @@ fun HeroSection() {
 fun AnalyzeButtonSection(
     selectedImageUri: Uri?,
     onImageSelected: (Uri?) -> Unit,
-    onAnalyzeStarted: () -> Unit
+    isAnalyzing: Boolean,
+    onAnalyzeStarted: () -> Unit,
+    onAnalyzeComplete: () -> Unit
 ) {
     val context = LocalContext.current
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -336,8 +332,8 @@ fun AnalyzeButtonSection(
                     initialValue = 0f,
                     targetValue = 1f,
                     animationSpec = infiniteRepeatable(
-                        animation = tween(2000, easing = LinearEasing),
-                        repeatMode = RepeatMode.Restart
+                        animation = tween(1500, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
                     ),
                     label = "scan_line_y"
                 )
@@ -385,25 +381,43 @@ fun AnalyzeButtonSection(
                     }
                     drawPath(pathBL, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
                     
-                    // Draw Scan Line
+                    // --- Cool Gradient Scanning Laser Effect ---
                     val currentY = scanLineY * size.height
-                    drawLine(
-                        color = Color(0xAAFFFFFF),
-                        start = Offset(0f, currentY),
-                        end = Offset(size.width, currentY),
-                        strokeWidth = 4.dp.toPx()
-                    )
                     
-                    // Draw Scan Gradient
+                    val colorLeft = Color(0xFF00D4FF)   // Cyan
+                    val colorCenter = Color(0xFFB042FF) // Purple
+                    val colorRight = Color(0xFFE23E57)  // Pink
+
+                    // 1. Large ambient vertical glow (using a generic mixed color for vertical fade)
+                    val mixColor = Color(0xFF8566FF)
                     drawRect(
                         brush = Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color(0x44FFFFFF)),
-                            startY = currentY - 100f,
-                            endY = currentY
+                            colors = listOf(Color.Transparent, mixColor.copy(alpha = 0.2f), mixColor.copy(alpha = 0.6f), mixColor.copy(alpha = 0.2f), Color.Transparent),
+                            startY = currentY - 120f,
+                            endY = currentY + 120f
                         ),
-                        topLeft = Offset(0f, currentY - 100f),
-                        size = androidx.compose.ui.geometry.Size(size.width, 100f)
+                        topLeft = Offset(0f, currentY - 120f),
+                        size = androidx.compose.ui.geometry.Size(size.width, 240f)
                     )
+                    
+                    // 2. Intense center horizontal laser beam with multi-color gradient
+                    drawRect(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(Color.Transparent, colorLeft, colorCenter, Color.White, colorCenter, colorRight, Color.Transparent),
+                            startX = 0f,
+                            endX = size.width
+                        ),
+                        topLeft = Offset(0f, currentY - 3.dp.toPx()),
+                        size = androidx.compose.ui.geometry.Size(size.width, 6.dp.toPx())
+                    )
+                }
+                
+                // Simulating analysis completion when the text/progress UI is removed
+                if (isAnalyzing) {
+                    LaunchedEffect(Unit) {
+                        kotlinx.coroutines.delay(3500)
+                        onAnalyzeComplete()
+                    }
                 }
             }
         } else {
@@ -830,66 +844,7 @@ fun BottomNavItem(
     }
 }
 
-@Composable
-fun AIAnalyzingContainer(onComplete: () -> Unit) {
-    var progress by remember { mutableStateOf(0f) }
 
-    LaunchedEffect(Unit) {
-        animate(
-            initialValue = 0f,
-            targetValue = 0.72f,
-            animationSpec = tween(durationMillis = 3000, easing = LinearOutSlowInEasing)
-        ) { value, _ ->
-            progress = value
-        }
-        kotlinx.coroutines.delay(1000)
-        onComplete()
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(Color(0xFF1E2125))
-            .padding(24.dp)
-    ) {
-        Column {
-            Text(
-                text = "AI is analyzing your outfit...",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Reviewing colors, fit, style & more",
-                color = Color(0xFFA0A0A0),
-                fontSize = 14.sp
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(3.dp)),
-                    color = Color(0xFFFF4B6E),
-                    trackColor = Color(0xFF333333)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                Text(
-                    text = "${(progress * 100).toInt()}%",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-        }
-    }
-}
 
 fun android.content.Context.createImageFile(): java.io.File {
     val timeStamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault()).format(java.util.Date())
