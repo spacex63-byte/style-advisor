@@ -324,7 +324,7 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .height(240.dp),
+            .height(260.dp),
         horizontalArrangement = Arrangement.spacedBy(0.dp)
     ) {
         // Left Column: Score and text
@@ -398,7 +398,7 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                     lineHeight = 14.sp
                 )
                 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 
                 Box(
                     modifier = Modifier
