@@ -35,6 +35,27 @@ class AnalysisViewModel : ViewModel() {
         _uiState.value = AnalysisState.Analyzing
         viewModelScope.launch {
             try {
+                val USE_REAL_API = false // Set to true when ready to use the actual API again
+                
+                // If it is the sample image or we are testing UI, return a mock response to save money
+                if (!USE_REAL_API || uri.toString().contains("android.resource")) {
+                    kotlinx.coroutines.delay(1000) // Simulate network delay
+                    val mockResult = AnalysisResult(
+                        overallScore = 88,
+                        colorHarmonyScore = 92,
+                        fitScore = 85,
+                        styleScore = 89,
+                        shortTitle = "Smart Casual / Urban Chic",
+                        shortDescription = "Neutral tones with a sophisticated contrast",
+                        styleTags = listOf("Smart Casual", "Monochrome", "Layered"),
+                        bestForOccasions = listOf("Coffee dates", "Casual Fridays", "City strolling"),
+                        whatLooksBest = "The layered jacket over the casual tee creates a relaxed but put-together silhouette.",
+                        whatCouldImprove = "Add a subtle silver chain or watch, or try a slightly brighter inner shirt for pop."
+                    )
+                    _uiState.value = AnalysisState.Success(mockResult)
+                    return@launch
+                }
+                
                 val bitmap = loadBitmap(context, uri)
                 if (bitmap == null) {
                     _uiState.value = AnalysisState.Error("Failed to load image")

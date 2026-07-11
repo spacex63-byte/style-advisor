@@ -52,10 +52,11 @@ class AiAnalysisService {
         
         var responseBodyString = ""
         try {
-            responseBodyString = sendAnalysisRequest(base64Image, prompt, "gpt-4o")
+            // Use the premium vision model supported by Mesh API
+            responseBodyString = sendAnalysisRequest(base64Image, prompt, "openai/gpt-5.4-image")
         } catch (e: Exception) {
-            // Fallback to lower cost model if gpt-4o fails
-            responseBodyString = sendAnalysisRequest(base64Image, prompt, "gpt-4o-mini")
+            // Fallback to same model (or another if available) if it fails
+            responseBodyString = sendAnalysisRequest(base64Image, prompt, "openai/gpt-5.4-image")
         }
         
         // Parse the OpenAI-compatible response format
