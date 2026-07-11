@@ -12,6 +12,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.example.styleadvisor.R
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -110,6 +113,21 @@ fun OverviewContent(result: AnalysisResult, imageUri: Uri?) {
             title = "What Could Improve",
             description = result.whatCouldImprove
         )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        ScoreBreakdownCard(result = result)
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        OutfitElementsCard(elements = result.outfitElements)
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        DetectedColorsCard(colors = result.detectedColors, description = result.colorsDescription)
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        PersonalizedTipsCard(tips = result.personalizedTips)
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        UpgradeProCard()
         
         Spacer(modifier = Modifier.height(32.dp))
     }
@@ -307,103 +325,110 @@ fun ResultTopBar(title: String, onBack: () -> Unit) {
 
 @Composable
 fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .height(224.dp)
-            .clip(RoundedCornerShape(32.dp))
-            .background(androidx.compose.ui.graphics.Brush.linearGradient(
-                colors = listOf(Color.White, Color(0xFFFDECE9))
-            ))
+            .height(220.dp),
+        horizontalArrangement = Arrangement.spacedBy(0.dp)
     ) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            // Left Content
+        // Left Column: Score and text
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(24.dp))
+                .background(Color.White)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            // Circular Score
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(start = 20.dp, end = 8.dp),
+                modifier = Modifier.size(90.dp).align(Alignment.CenterHorizontally),
                 contentAlignment = Alignment.Center
             ) {
+                CircularProgressIndicator(
+                    progress = { result.overallScore / 100f },
+                    modifier = Modifier.fillMaxSize(),
+                    color = PrimaryBlue,
+                    trackColor = Color(0xFFF5F5F5),
+                    strokeWidth = 8.dp,
+                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+                )
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.offset(y = 2.dp)
                 ) {
-                    // Circular Progress
-                    Box(
-                        modifier = Modifier.size(100.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            progress = { result.overallScore / 100f },
-                            modifier = Modifier.fillMaxSize(),
-                            color = ScoreTextBlue,
-                            trackColor = Color(0xFFFDECE9),
-                            strokeWidth = 8.dp,
-                            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
-                        )
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.offset(y = 2.dp)
-                        ) {
-                            Text(
-                                text = "${result.overallScore}",
-                                fontSize = 28.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = TextNavyBlue,
-                                lineHeight = 28.sp
-                            )
-                            Text(
-                                text = "/100",
-                                fontSize = 14.sp,
-                                color = TextNavyBlue,
-                                modifier = Modifier.offset(y = (-4).dp)
-                            )
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(20.dp))
-                    
                     Text(
-                        text = result.shortTitle,
-                        fontSize = 18.sp,
+                        text = "${result.overallScore}",
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextNavyBlue,
-                        lineHeight = 24.sp
+                        lineHeight = 28.sp
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = result.shortDescription,
+                        text = "/100",
                         fontSize = 12.sp,
                         color = TextNavyBlue,
-                        lineHeight = 18.sp
+                        modifier = Modifier.offset(y = (-4).dp)
                     )
                 }
             }
             
-            // Right Image Placeholder
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text(
+                text = result.shortTitle,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextNavyBlue,
+                lineHeight = 20.sp
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // Badge
             Box(
                 modifier = Modifier
-                    .weight(0.9f)
-                    .fillMaxHeight()
-                    .background(SurfaceVariant)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFE3F2FD))
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
-                if (imageUri != null) {
-                    AsyncImage(
-                        model = imageUri,
-                        contentDescription = "Analyzed image",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.align(Alignment.Center).size(120.dp),
-                        tint = TextMuted.copy(alpha = 0.3f)
-                    )
-                }
+                Text("Great Look!", fontSize = 11.sp, color = PrimaryBlue, fontWeight = FontWeight.Medium)
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = result.shortDescription,
+                fontSize = 12.sp,
+                color = TextNavyBlue,
+                lineHeight = 16.sp
+            )
+        }
+        
+        // Right Column: Image
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(24.dp))
+                .background(SurfaceVariant)
+        ) {
+            if (imageUri != null) {
+                AsyncImage(
+                    model = imageUri,
+                    contentDescription = "Analyzed image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = R.drawable.sample_outfit),
+                    contentDescription = "Analyzed image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
             }
         }
     }
@@ -414,36 +439,48 @@ fun NewAttributeGrid(result: AnalysisResult) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(androidx.compose.foundation.rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.Palette, label = "Color\nHarmony", score = "${result.colorHarmonyScore}")
-        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.Person, label = "Fit", score = "${result.fitScore}") // Using Person/Checkroom placeholder
-        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.ThumbUp, label = "Style", score = "${result.styleScore}")
-        NewAttributeCard(modifier = Modifier.width(100.dp).height(120.dp), icon = Icons.Default.Star, label = "Overall", score = "${result.overallScore}", isHighlight = true)
+        NewAttributeCard(modifier = Modifier.weight(1f).height(120.dp), icon = Icons.Default.Palette, label = "Color\nHarmony", score = result.colorHarmonyScore)
+        NewAttributeCard(modifier = Modifier.weight(1f).height(120.dp), icon = Icons.Default.Person, label = "Fit", score = result.fitScore)
+        NewAttributeCard(modifier = Modifier.weight(1f).height(120.dp), icon = Icons.Default.ThumbUp, label = "Style", score = result.styleScore)
     }
 }
 
 @Composable
-fun NewAttributeCard(modifier: Modifier = Modifier, icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, score: String, isHighlight: Boolean = false) {
-    val bgColor = if (isHighlight) Color(0xFFFDECE9) else Color.White
+fun NewAttributeCard(modifier: Modifier = Modifier, icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, score: Int) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(bgColor)
-            .padding(vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
+            .background(Color.White)
+            .padding(12.dp),
+        horizontalAlignment = Alignment.Start,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = TextNavyBlue, modifier = Modifier.size(24.dp))
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextNavyBlue, textAlign = TextAlign.Center, lineHeight = 14.sp)
-        Spacer(modifier = Modifier.height(12.dp))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFFF5F5F5)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = icon, contentDescription = null, tint = TextNavyBlue, modifier = Modifier.size(16.dp))
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextNavyBlue, lineHeight = 14.sp)
+        }
+        Spacer(modifier = Modifier.weight(1f))
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(text = score, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue, modifier = Modifier.alignByBaseline())
+            Text(text = "$score", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = PrimaryBlue, modifier = Modifier.alignByBaseline())
             Text(text = "/100", fontSize = 12.sp, color = TextMuted, modifier = Modifier.alignByBaseline())
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        LinearProgressIndicator(
+            progress = { score / 100f },
+            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+            color = PrimaryBlue,
+            trackColor = Color(0xFFF5F5F5),
+            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
     }
 }
 
@@ -497,23 +534,21 @@ fun BestForCard(occasions: List<String>) {
             .padding(20.dp)
     ) {
         Text(text = "Best For", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
         ) {
             val iconMap = mapOf(
-                "Casual Outing" to Icons.Default.ShoppingBag,
+                "Casual Outing" to Icons.Default.Coffee,
                 "Date Night" to Icons.Default.FavoriteBorder,
                 "Travel" to Icons.Default.Flight,
                 "College" to Icons.Default.School,
                 "Work" to Icons.Default.Work,
                 "Party" to Icons.Default.LocalBar
             )
-            occasions.forEach { occasion ->
-                BestForItem(icon = iconMap[occasion] ?: Icons.Default.Check, label = occasion.replace(" ", "\n"))
+            occasions.take(3).forEach { occasion ->
+                BestForItem(icon = iconMap[occasion] ?: Icons.Default.Check, label = occasion)
             }
         }
     }
@@ -521,27 +556,34 @@ fun BestForCard(occasions: List<String>) {
 
 @Composable
 fun BestForItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(48.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFF5F5F5)),
+                .background(Color(0xFFE3F2FD)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(imageVector = icon, contentDescription = null, tint = TextNavyBlue, modifier = Modifier.size(18.dp))
+            Icon(imageVector = icon, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(24.dp))
         }
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(text = label, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = TextNavyBlue, lineHeight = 14.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = label.replace(" ", "\n"),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = TextNavyBlue,
+            lineHeight = 16.sp,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
 @Composable
 fun FeedbackCard(isPositive: Boolean, title: String, description: String) {
-    val bgColor = if (isPositive) Color(0xFFEDF6E5) else Color(0xFFFDECE9)
-    val iconColor = if (isPositive) Color(0xFF4CAF50) else Color(0xFFFF7043)
+    val bgColor = if (isPositive) Color(0xFFF0FDF4) else Color(0xFFFEF2F2)
+    val iconColor = if (isPositive) Color(0xFF22C55E) else Color(0xFFEF4444)
     val iconVector = Icons.Default.CheckCircle
     
     Row(
@@ -562,10 +604,244 @@ fun FeedbackCard(isPositive: Boolean, title: String, description: String) {
         Spacer(modifier = Modifier.width(16.dp))
         Column {
             Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(text = description, fontSize = 13.sp, color = TextNavyBlue, lineHeight = 18.sp)
         }
     }
 }
 
+@Composable
+fun ScoreBreakdownCard(result: AnalysisResult) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .padding(20.dp)
+    ) {
+        Text(text = "Score Breakdown", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
+        Spacer(modifier = Modifier.height(20.dp))
+        
+        ScoreBreakdownItem(icon = Icons.Default.Palette, label = "Color Harmony", score = result.colorHarmonyScore)
+        Spacer(modifier = Modifier.height(16.dp))
+        ScoreBreakdownItem(icon = Icons.Default.Person, label = "Fit", score = result.fitScore)
+        Spacer(modifier = Modifier.height(16.dp))
+        ScoreBreakdownItem(icon = Icons.Default.ThumbUp, label = "Style", score = result.styleScore)
+        Spacer(modifier = Modifier.height(16.dp))
+        ScoreBreakdownItem(icon = Icons.Default.AutoAwesome, label = "Overall Impression", score = result.overallScore)
+    }
+}
 
+@Composable
+fun ScoreBreakdownItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, score: Int) {
+    Column {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFFE3F2FD)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = icon, contentDescription = null, tint = TextNavyBlue, modifier = Modifier.size(16.dp))
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(text = label, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextNavyBlue)
+            Spacer(modifier = Modifier.weight(1f))
+            Row(verticalAlignment = Alignment.Bottom) {
+                Text(text = "$score", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PrimaryBlue, modifier = Modifier.alignByBaseline())
+                Text(text = "/100", fontSize = 12.sp, color = TextMuted, modifier = Modifier.alignByBaseline())
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        LinearProgressIndicator(
+            progress = { score / 100f },
+            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
+            color = PrimaryBlue,
+            trackColor = Color(0xFFF5F5F5),
+            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
+    }
+}
+
+@Composable
+fun OutfitElementsCard(elements: List<String>) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .padding(20.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFFE3F2FD)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = Icons.Default.Checkroom, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(16.dp))
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(text = "Outfit Elements", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // 2 columns layout
+        val chunked = elements.chunked(maxOf(1, (elements.size + 1) / 2))
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.weight(1f)) {
+                chunked.getOrNull(0)?.forEach { element ->
+                    OutfitElementItem(element)
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                chunked.getOrNull(1)?.forEach { element ->
+                    OutfitElementItem(element)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun OutfitElementItem(label: String) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
+        Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(PrimaryBlue))
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = label, fontSize = 13.sp, color = TextNavyBlue)
+    }
+}
+
+@Composable
+fun DetectedColorsCard(colors: List<String>, description: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .padding(20.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFFE3F2FD)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = Icons.Default.WaterDrop, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(16.dp))
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(text = "Detected Colors", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            colors.forEach { hex ->
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color(android.graphics.Color.parseColor(if (hex.startsWith("#")) hex else "#$hex")))
+                        .border(1.dp, Color(0xFFF0F0F0), CircleShape)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(text = description, fontSize = 13.sp, color = TextNavyBlue)
+    }
+}
+
+@Composable
+fun PersonalizedTipsCard(tips: List<com.example.styleadvisor.model.Tip>) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .padding(20.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier.size(32.dp).clip(CircleShape).background(Color(0xFFE3F2FD)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = Icons.Default.Lightbulb, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(16.dp))
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(text = "Personalized Tips", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        val icons = listOf(Icons.Default.Watch, Icons.Default.Layers, Icons.Default.DirectionsWalk)
+        tips.forEachIndexed { index, tip ->
+            PersonalizedTipItem(
+                icon = icons.getOrElse(index) { Icons.Default.Check },
+                title = tip.title,
+                description = tip.description
+            )
+            if (index < tips.size - 1) {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun PersonalizedTipItem(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, description: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFF5F8FF)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = icon, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(24.dp))
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextNavyBlue)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = description, fontSize = 12.sp, color = TextMuted, lineHeight = 16.sp)
+        }
+        Icon(imageVector = Icons.Default.KeyboardArrowRight, contentDescription = null, tint = TextNavyBlue)
+    }
+}
+
+@Composable
+fun UpgradeProCard() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color(0xFFF5F8FF))
+            .padding(20.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier.size(40.dp).clip(CircleShape).background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = Icons.Default.Star, contentDescription = null, tint = PrimaryBlue, modifier = Modifier.size(20.dp))
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = "Want More Personalized Tips?", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "Unlock advanced insights tailored to\nyour style & body type.", fontSize = 11.sp, color = TextMuted, lineHeight = 14.sp)
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(20.dp))
+                .background(TextNavyBlue)
+                .clickable { }
+                .padding(horizontal = 16.dp, vertical = 10.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "Upgrade to Pro", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = Color.White)
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
+            }
+        }
+    }
+}

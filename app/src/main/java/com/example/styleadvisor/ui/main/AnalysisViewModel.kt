@@ -50,7 +50,15 @@ class AnalysisViewModel : ViewModel() {
                         styleTags = listOf("Smart Casual", "Monochrome", "Layered"),
                         bestForOccasions = listOf("Coffee dates", "Casual Fridays", "City strolling"),
                         whatLooksBest = "The layered jacket over the casual tee creates a relaxed but put-together silhouette.",
-                        whatCouldImprove = "Add a subtle silver chain or watch, or try a slightly brighter inner shirt for pop."
+                        whatCouldImprove = "Add a subtle silver chain or watch, or try a slightly brighter inner shirt for pop.",
+                        outfitElements = listOf("Black T-Shirt", "Brown Jacket", "Gray Joggers", "Clear Glasses", "Casual Look"),
+                        detectedColors = listOf("#1A202C", "#B07D5A", "#8B8B8B", "#E8D3E3", "#FFFFFF"),
+                        colorsDescription = "Neutral and balanced tones.",
+                        personalizedTips = listOf(
+                            com.example.styleadvisor.model.Tip("Accessorize Smartly", "A watch or chain will elevate\nyour overall look."),
+                            com.example.styleadvisor.model.Tip("Play With Layers", "Try adding a light shirt or hoodie\nunder the jacket."),
+                            com.example.styleadvisor.model.Tip("Footwear Upgrade", "Clean sneakers or loafers will\ncomplete the vibe.")
+                        )
                     )
                     _uiState.value = AnalysisState.Success(mockResult)
                     return@launch

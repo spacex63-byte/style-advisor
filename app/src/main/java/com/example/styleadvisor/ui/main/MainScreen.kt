@@ -603,12 +603,6 @@ fun RecentAnalysesSection(onItemClick: (NavKey) -> Unit) {
                 color = TextNavyBlue,
                 letterSpacing = (-0.2).sp
             )
-            Text(
-                text = "See all",
-                fontSize = 12.sp,
-                color = TextMuted,
-                letterSpacing = (-0.2).sp
-            )
         }
         
         Spacer(modifier = Modifier.height(14.dp))
