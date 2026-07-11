@@ -47,7 +47,7 @@ fun ProfileContent() {
             Column {
                 Text(
                     text = "Profile",
-                    fontSize = 32.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextNavyBlue
                 )
@@ -58,31 +58,17 @@ fun ProfileContent() {
                 )
             }
             
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color.White),
-                contentAlignment = Alignment.Center
-            ) {
-                IconButton(onClick = { /* Settings */ }) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = TextNavyBlue
-                    )
-                }
-            }
+
         }
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(18.dp))
         
         // User Profile Card
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(32.dp))
+                .clip(RoundedCornerShape(24.dp))
                 .background(Color.White)
                 .padding(16.dp)
         ) {
