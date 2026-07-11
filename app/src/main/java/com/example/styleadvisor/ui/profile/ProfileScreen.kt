@@ -196,6 +196,7 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(64.dp)
                 .padding(horizontal = 16.dp)
                 .clip(RoundedCornerShape(24.dp))
                 .background(Color(0xFFF0F4FF))
@@ -261,7 +262,7 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}) {
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = TextMuted)
         }
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         
         Text(
             text = "My Overview",
