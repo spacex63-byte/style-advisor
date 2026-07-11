@@ -335,11 +335,12 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                 .clip(RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp, topEnd = 0.dp, bottomEnd = 0.dp))
                 .background(Color.White)
                 .padding(16.dp),
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Circular Score
             Box(
-                modifier = Modifier.size(90.dp).align(Alignment.CenterHorizontally),
+                modifier = Modifier.size(110.dp),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
@@ -356,50 +357,56 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                 ) {
                     Text(
                         text = "${result.overallScore}",
-                        fontSize = 28.sp,
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextNavyBlue,
-                        lineHeight = 28.sp
+                        lineHeight = 32.sp
                     )
                     Text(
                         text = "/100",
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         color = TextNavyBlue,
                         modifier = Modifier.offset(y = (-4).dp)
                     )
                 }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Text(
-                text = result.shortTitle,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextNavyBlue,
-                lineHeight = 16.sp
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // Badge
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFE3F2FD))
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
-            ) {
-                Text("Great Look!", fontSize = 11.sp, color = PrimaryBlue, fontWeight = FontWeight.Medium)
+            Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
+                val score = result.overallScore
+                val statusText = when {
+                    score >= 85 -> "Great Look! 🔥"
+                    score >= 70 -> "Looking Good 👍"
+                    score >= 50 -> "Not Bad 😐"
+                    else -> "Needs Work 😢"
+                }
+                
+                Text(
+                    text = statusText,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextNavyBlue
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Text(
+                    text = result.shortDescription,
+                    fontSize = 12.sp,
+                    color = TextNavyBlue,
+                    lineHeight = 16.sp
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFE3F2FD))
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(result.shortTitle, fontSize = 11.sp, color = PrimaryBlue, fontWeight = FontWeight.Medium)
+                }
             }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Text(
-                text = result.shortDescription,
-                fontSize = 12.sp,
-                color = TextNavyBlue,
-                lineHeight = 16.sp
-            )
         }
         
         // Right Column: Image
@@ -618,13 +625,13 @@ fun ScoreBreakdownCard(result: AnalysisResult) {
         Text(text = "Score Breakdown", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(20.dp))
         
-        ScoreBreakdownItem(icon = Icons.Default.Palette, label = "Color Harmony", score = result.colorHarmonyScore)
+        ScoreBreakdownItem(icon = Icons.Default.Palette, label = "Color Match", score = result.colorHarmonyScore)
         Spacer(modifier = Modifier.height(16.dp))
-        ScoreBreakdownItem(icon = Icons.Default.Person, label = "Fit", score = result.fitScore)
+        ScoreBreakdownItem(icon = Icons.Default.Person, label = "Clothing Fit", score = result.fitScore)
         Spacer(modifier = Modifier.height(16.dp))
-        ScoreBreakdownItem(icon = Icons.Default.ThumbUp, label = "Style", score = result.styleScore)
+        ScoreBreakdownItem(icon = Icons.Default.ThumbUp, label = "Fashion Style", score = result.styleScore)
         Spacer(modifier = Modifier.height(16.dp))
-        ScoreBreakdownItem(icon = Icons.Default.AutoAwesome, label = "Overall Impression", score = result.overallScore)
+        ScoreBreakdownItem(icon = Icons.Default.AutoAwesome, label = "Overall Look", score = result.overallScore)
     }
 }
 
@@ -652,7 +659,8 @@ fun ScoreBreakdownItem(icon: androidx.compose.ui.graphics.vector.ImageVector, la
             modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
             color = PrimaryBlue,
             trackColor = Color(0xFFF5F5F5),
-            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
+            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
+            drawStopIndicator = {}
         )
     }
 }
