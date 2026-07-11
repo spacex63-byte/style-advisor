@@ -32,6 +32,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.text.style.TextAlign
@@ -363,9 +365,18 @@ fun StatItem(value: String, label: String) {
 }
 
 @Composable
-fun GraphCard() {
+fun GraphCard(state: ProfileState) {
     val graphBg = Color(0xFFF0F4FA)
     val lineColor = Color(0xFF3C60F4)
+    
+    val animationProgress = remember { androidx.compose.animation.core.Animatable(0f) }
+    LaunchedEffect(state.recentScores) {
+        animationProgress.snapTo(0f)
+        animationProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = androidx.compose.animation.core.tween(durationMillis = 1500, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+        )
+    }
     
     Box(
         modifier = Modifier
@@ -392,7 +403,7 @@ fun GraphCard() {
                     Spacer(modifier = Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.Bottom) {
                         Text(
-                            text = "87",
+                            text = state.avgScore.toString(),
                             fontSize = 42.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color(0xFF0B1527)
@@ -425,29 +436,6 @@ fun GraphCard() {
                         }
                     }
                 }
-                
-                // This Month dropdown
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White)
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "This Month",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF0B1527)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        tint = Color(0xFF0B1527),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -459,11 +447,11 @@ fun GraphCard() {
                     val h = size.height
                     
                     val points = listOf(
-                        0f to 0.7f,
-                        0.25f to 0.65f,
-                        0.5f to 0.45f,
-                        0.75f to 0.48f,
-                        1f to 0.25f
+                        0f to state.recentScores[0],
+                        0.25f to state.recentScores[1],
+                        0.5f to state.recentScores[2],
+                        0.75f to state.recentScores[3],
+                        1f to state.recentScores[4]
                     )
                     
                     val path = Path()
@@ -477,12 +465,22 @@ fun GraphCard() {
                         }
                     }
                     
+                    val animatedPath = Path()
+                    val pathMeasure = androidx.compose.ui.graphics.PathMeasure()
+                    pathMeasure.setPath(path, false)
+                    pathMeasure.getSegment(0f, pathMeasure.length * animationProgress.value, animatedPath, true)
+                    
                     // Draw fill gradient
                     val fillPath = Path().apply {
-                        addPath(path)
-                        lineTo(w, h)
-                        lineTo(0f, h)
-                        close()
+                        addPath(animatedPath)
+                        // Note: To properly close the fill, we must connect to the bottom axis
+                        val currentLength = pathMeasure.length * animationProgress.value
+                        val pos = pathMeasure.getPosition(currentLength)
+                        if (pos != Offset.Unspecified) {
+                            lineTo(pos.x, h)
+                            lineTo(0f, h)
+                            close()
+                        }
                     }
                     
                     drawPath(
@@ -494,25 +492,27 @@ fun GraphCard() {
                     
                     // Draw line
                     drawPath(
-                        path = path,
+                        path = animatedPath,
                         color = lineColor,
                         style = Stroke(width = 3.dp.toPx())
                     )
                     
-                    // Draw points
-                    points.forEach { (xRatio, yRatio) ->
-                        val x = xRatio * w
-                        val y = yRatio * h
-                        drawCircle(
-                            color = lineColor,
-                            radius = 5.dp.toPx(),
-                            center = Offset(x, y)
-                        )
-                        drawCircle(
-                            color = Color.White,
-                            radius = 3.dp.toPx(),
-                            center = Offset(x, y)
-                        )
+                    // Draw points up to progress
+                    points.forEachIndexed { index, (xRatio, yRatio) ->
+                        if ((index / (points.size - 1).toFloat()) <= animationProgress.value) {
+                            val x = xRatio * w
+                            val y = yRatio * h
+                            drawCircle(
+                                color = lineColor,
+                                radius = 5.dp.toPx(),
+                                center = Offset(x, y)
+                            )
+                            drawCircle(
+                                color = Color.White,
+                                radius = 3.dp.toPx(),
+                                center = Offset(x, y)
+                            )
+                        }
                     }
                 }
             }
@@ -539,7 +539,7 @@ fun GraphCard() {
 }
 
 @Composable
-fun TopStyleCard() {
+fun TopStyleCard(state: ProfileState) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -559,7 +559,7 @@ fun TopStyleCard() {
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "Smart Casual",
+                text = state.topStyle,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextNavyBlue
