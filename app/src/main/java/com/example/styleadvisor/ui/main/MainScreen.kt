@@ -48,6 +48,15 @@ import com.example.styleadvisor.AnalysisResult
 import com.example.styleadvisor.R
 import com.example.styleadvisor.theme.*
 import androidx.compose.animation.*
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.FileProvider
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.styleadvisor.ui.profile.ProfileContent
 
 enum class BottomTab {
@@ -60,6 +69,37 @@ fun MainScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableStateOf(BottomTab.HOME) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var isAnalyzing by remember { mutableStateOf(false) }
+    
+    val context = LocalContext.current
+    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
+    
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success && tempImageUri != null) {
+                selectedImageUri = tempImageUri
+                isAnalyzing = true
+            }
+        }
+    )
+    
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                val file = context.createImageFile()
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.provider",
+                    file
+                )
+                tempImageUri = uri
+                cameraLauncher.launch(uri)
+            }
+        }
+    )
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -67,7 +107,8 @@ fun MainScreen(
         bottomBar = { 
             CustomBottomBar(
                 selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it }
+                onTabSelected = { selectedTab = it },
+                onCameraClick = { permissionLauncher.launch(android.Manifest.permission.CAMERA) }
             ) 
         }
     ) { innerPadding ->
@@ -92,16 +133,41 @@ fun MainScreen(
                 label = "tab_transition"
             ) { targetTab ->
                 when (targetTab) {
-                    BottomTab.HOME -> HomeContent(onItemClick)
+                    BottomTab.HOME -> HomeContent(
+                        onItemClick = onItemClick,
+                        selectedImageUri = selectedImageUri,
+                        onImageSelected = { selectedImageUri = it },
+                        onAnalyzeStarted = { isAnalyzing = true }
+                    )
                     BottomTab.PROFILE -> ProfileContent()
                 }
+            }
+            
+            // AI Analyzing Container
+            AnimatedVisibility(
+                visible = isAnalyzing,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                AIAnalyzingContainer(
+                    onComplete = {
+                        isAnalyzing = false
+                        onItemClick(AnalysisResult)
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun HomeContent(onItemClick: (NavKey) -> Unit) {
+fun HomeContent(
+    onItemClick: (NavKey) -> Unit,
+    selectedImageUri: Uri?,
+    onImageSelected: (Uri?) -> Unit,
+    onAnalyzeStarted: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -115,7 +181,11 @@ fun HomeContent(onItemClick: (NavKey) -> Unit) {
         HeroSection()
         
         Spacer(modifier = Modifier.height(20.dp))
-        AnalyzeButtonSection()
+        AnalyzeButtonSection(
+            selectedImageUri = selectedImageUri,
+            onImageSelected = onImageSelected,
+            onAnalyzeStarted = onAnalyzeStarted
+        )
         
         Spacer(modifier = Modifier.height(20.dp))
         RecentAnalysesSection(onItemClick = onItemClick)
@@ -188,8 +258,49 @@ fun HeroSection() {
 }
 
 @Composable
-fun AnalyzeButtonSection() {
-    var isImageUploaded by remember { mutableStateOf(false) }
+fun AnalyzeButtonSection(
+    selectedImageUri: Uri?,
+    onImageSelected: (Uri?) -> Unit,
+    onAnalyzeStarted: () -> Unit
+) {
+    val context = LocalContext.current
+    var tempImageUri by remember { mutableStateOf<Uri?>(null) }
+    
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri -> 
+            if (uri != null) {
+                onImageSelected(uri)
+                onAnalyzeStarted()
+            }
+        }
+    )
+    
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { success ->
+            if (success && tempImageUri != null) {
+                onImageSelected(tempImageUri)
+                onAnalyzeStarted()
+            }
+        }
+    )
+    
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                val file = context.createImageFile()
+                val uri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.provider",
+                    file
+                )
+                tempImageUri = uri
+                cameraLauncher.launch(uri)
+            }
+        }
+    )
 
     Column(
         modifier = Modifier
@@ -197,7 +308,7 @@ fun AnalyzeButtonSection() {
             .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (isImageUploaded) {
+        if (selectedImageUri != null) {
             // Image Container
             Box(
                 modifier = Modifier
@@ -207,14 +318,30 @@ fun AnalyzeButtonSection() {
                     .border(4.dp, Color.White, RoundedCornerShape(32.dp))
                     .clip(RoundedCornerShape(32.dp))
                     .background(Color(0xFFEBE3DE))
-                    .clickable { isImageUploaded = false }
+                    .clickable { onImageSelected(null) }
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.hero_fashion_man),
-                    contentDescription = "Hero Fashion",
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(selectedImageUri)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Uploaded Fashion",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
+                
+                // Scanning Line Animation
+                val infiniteTransition = rememberInfiniteTransition(label = "scan")
+                val scanLineY by infiniteTransition.animateFloat(
+                    initialValue = 0f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(2000, easing = LinearEasing),
+                        repeatMode = RepeatMode.Restart
+                    ),
+                    label = "scan_line_y"
+                )
+                
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val bracketLength = 48.dp.toPx()
                     val bracketStroke = 4.dp.toPx()
@@ -257,6 +384,26 @@ fun AnalyzeButtonSection() {
                         lineTo(padding, size.height - padding - bracketLength)
                     }
                     drawPath(pathBL, color, style = Stroke(width = bracketStroke, cap = StrokeCap.Round))
+                    
+                    // Draw Scan Line
+                    val currentY = scanLineY * size.height
+                    drawLine(
+                        color = Color(0xAAFFFFFF),
+                        start = Offset(0f, currentY),
+                        end = Offset(size.width, currentY),
+                        strokeWidth = 4.dp.toPx()
+                    )
+                    
+                    // Draw Scan Gradient
+                    drawRect(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color(0x44FFFFFF)),
+                            startY = currentY - 100f,
+                            endY = currentY
+                        ),
+                        topLeft = Offset(0f, currentY - 100f),
+                        size = androidx.compose.ui.geometry.Size(size.width, 100f)
+                    )
                 }
             }
         } else {
@@ -267,7 +414,9 @@ fun AnalyzeButtonSection() {
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(32.dp))
                     .background(Color.White)
-                    .clickable { isImageUploaded = true },
+                    .clickable { 
+                        galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -310,19 +459,19 @@ fun AnalyzeButtonSection() {
                 .height(60.dp)
                 .clip(RoundedCornerShape(30.dp))
                 .background(TextNavyBlue)
-                .clickable { /* Action */ },
+                .clickable { permissionLauncher.launch(android.Manifest.permission.CAMERA) },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
             Icon(
                 imageVector = Icons.Default.CameraAlt,
-                contentDescription = "Upload Photo",
+                contentDescription = "Take Photo",
                 tint = Color.White,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "Upload Photo",
+                text = "Take Photo",
                 color = Color.White,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
@@ -553,7 +702,11 @@ fun PromoSection() {
 }
 
 @Composable
-fun CustomBottomBar(selectedTab: BottomTab, onTabSelected: (BottomTab) -> Unit) {
+fun CustomBottomBar(
+    selectedTab: BottomTab, 
+    onTabSelected: (BottomTab) -> Unit,
+    onCameraClick: () -> Unit
+) {
     val BlueAccent = Color(0xFF5A75FF)
     val LightBlueBg = Color(0xFFF5F6FE)
     val GrayIcon = Color(0xFFA0A0A0)
@@ -614,7 +767,7 @@ fun CustomBottomBar(selectedTab: BottomTab, onTabSelected: (BottomTab) -> Unit) 
                 )
                 .clip(CircleShape)
                 .background(Color.White)
-                .clickable { /* Camera Action */ },
+                .clickable { onCameraClick() },
             contentAlignment = Alignment.Center
         ) {
             Box(
@@ -675,4 +828,79 @@ fun BottomNavItem(
             fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
         )
     }
+}
+
+@Composable
+fun AIAnalyzingContainer(onComplete: () -> Unit) {
+    var progress by remember { mutableStateOf(0f) }
+
+    LaunchedEffect(Unit) {
+        animate(
+            initialValue = 0f,
+            targetValue = 0.72f,
+            animationSpec = tween(durationMillis = 3000, easing = LinearOutSlowInEasing)
+        ) { value, _ ->
+            progress = value
+        }
+        kotlinx.coroutines.delay(1000)
+        onComplete()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color(0xFF1E2125))
+            .padding(24.dp)
+    ) {
+        Column {
+            Text(
+                text = "AI is analyzing your outfit...",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Reviewing colors, fit, style & more",
+                color = Color(0xFFA0A0A0),
+                fontSize = 14.sp
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp)),
+                    color = Color(0xFFFF4B6E),
+                    trackColor = Color(0xFF333333)
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    text = "${(progress * 100).toInt()}%",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+fun android.content.Context.createImageFile(): java.io.File {
+    val timeStamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault()).format(java.util.Date())
+    val imageFileName = "JPEG_" + timeStamp + "_"
+    val storageDir = java.io.File(cacheDir, "images")
+    if (!storageDir.exists()) {
+        storageDir.mkdirs()
+    }
+    return java.io.File.createTempFile(
+        imageFileName, /* prefix */
+        ".jpg", /* suffix */
+        storageDir /* directory */
+    )
 }
