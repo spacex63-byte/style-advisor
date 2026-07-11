@@ -27,25 +27,27 @@ import com.example.styleadvisor.theme.*
 
 @Composable
 fun AnalysisResultScreen(onBack: () -> Unit) {
-    Scaffold(
-        containerColor = BackgroundCoolWhite,
-        topBar = {
-            Column(modifier = Modifier.statusBarsPadding()) {
-                Spacer(modifier = Modifier.height(4.dp))
-                ResultTopBar(
-                    title = "Analysis Result",
-                    onBack = onBack
-                )
+    Box(modifier = Modifier.fillMaxSize().background(GlobalBackgroundGradient)) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                Column(modifier = Modifier.statusBarsPadding()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    ResultTopBar(
+                        title = "Analysis Result",
+                        onBack = onBack
+                    )
+                }
             }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-        ) {
-            OverviewContent()
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                OverviewContent()
+            }
         }
     }
 }
@@ -308,7 +310,7 @@ fun HeroScoreCard() {
                             modifier = Modifier.fillMaxSize(),
                             color = ScoreTextBlue,
                             trackColor = Color(0xFFFDECE9),
-                            strokeWidth = 10.dp,
+                            strokeWidth = 8.dp,
                             strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
                         )
                         Column(

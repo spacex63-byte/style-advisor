@@ -74,7 +74,7 @@ fun MainScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(ThemeLightBlue)
+                .background(GlobalBackgroundGradient)
                 .padding(
                     top = innerPadding.calculateTopPadding(),
                     bottom = innerPadding.calculateBottomPadding()
@@ -619,7 +619,7 @@ fun CustomBottomBar(selectedTab: BottomTab, onTabSelected: (BottomTab) -> Unit) 
         ) {
             Box(
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(58.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.linearGradient(

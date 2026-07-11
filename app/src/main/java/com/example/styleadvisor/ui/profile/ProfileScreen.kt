@@ -144,7 +144,7 @@ fun ProfileContent() {
                     
                     Text(
                         text = "Style Explorer",
-                        fontSize = 14.sp,
+                        fontSize = 12.sp,
                         color = TextMuted
                     )
                     
@@ -175,7 +175,7 @@ fun ProfileContent() {
                 }
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(19.dp))
             HorizontalDivider(color = SurfaceVariant, thickness = 1.dp)
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -292,7 +292,6 @@ fun StatItem(value: String, label: String) {
             fontWeight = FontWeight.Bold,
             color = TextNavyBlue
         )
-        Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = label,
             fontSize = 12.sp,

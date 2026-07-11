@@ -2,8 +2,8 @@ package com.example.styleadvisor.theme
 
 import androidx.compose.ui.graphics.Color
 
-val BackgroundCoolWhite = Color(0xFFF4F7FC)
-val ThemeLightBlue = Color(0xFFE8EFFF)
+val BackgroundCoolWhite = Color(0xFFFAFBFF)
+val ThemeLightBlue = Color(0xFFF2F5FF)
 val PrimaryBlue = Color(0xFF4A7DFF)
 val TextNavyBlue = Color(0xFF0F172A)
 val TextMuted = Color(0xFF64748B)
@@ -37,6 +37,10 @@ val PaletteTan = Color(0xFFDAB37B)
 val PaletteWhite = Color(0xFFFFFFFF)
 val PaletteBrown = Color(0xFF8D532C)
 val PaletteBlack = Color(0xFF1E2125)
+
+val GlobalBackgroundGradient = androidx.compose.ui.graphics.Brush.verticalGradient(
+    colors = listOf(ThemeLightBlue, Color.White)
+)
 
 // Category Badge Colors
 val BadgePurpleBg = Color(0xFFF0E6FA)
