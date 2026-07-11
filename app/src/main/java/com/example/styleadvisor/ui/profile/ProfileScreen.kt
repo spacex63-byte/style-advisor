@@ -109,7 +109,7 @@ fun ProfileContent() {
                 
                 Spacer(modifier = Modifier.width(20.dp))
                 
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = "Tavorian",
@@ -126,37 +126,33 @@ fun ProfileContent() {
                         )
                     }
                     
-                    Spacer(modifier = Modifier.height(2.dp))
-                    
                     Text(
                         text = "Style Explorer",
                         fontSize = 12.sp,
                         color = TextMuted
                     )
-                    
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(TextNavyBlue)
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.AutoAwesome,
-                                contentDescription = null,
-                                tint = Color(0xFFFFD54F),
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "Premium",
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.White
-                            )
-                        }
+                }
+                
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(TextNavyBlue)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = Color(0xFFFFD54F),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Premium",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
+                        )
                     }
                 }
             }
@@ -271,10 +267,13 @@ fun ProfileContent() {
 
 @Composable
 fun StatItem(value: String, label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy((-4).dp)
+    ) {
         Text(
             text = value,
-            fontSize = 20.sp,
+            fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             color = TextNavyBlue
         )
