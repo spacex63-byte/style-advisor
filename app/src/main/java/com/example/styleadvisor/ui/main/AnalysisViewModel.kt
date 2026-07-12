@@ -39,16 +39,16 @@ class AnalysisViewModel : ViewModel() {
                 colorHarmonyScore = 95,
                 fitScore = 88,
                 styleScore = 94,
-                shortTitle = "Great Casual Look",
-                shortDescription = "A nice blue shirt with a jacket that makes you look smart and relaxed.",
-                primaryClothingItem = "Blue Patterned Shirt",
-                styleTags = listOf("Casual", "Smart", "Cool"),
-                bestForOccasions = listOf("Weekend Brunch", "Casual Outing", "Date Night"),
-                whatLooksBest = "The blue shirt looks great and matches well with the jacket.",
-                whatCouldImprove = "Make sure the jacket sleeves fit nicely around your wrists.",
-                outfitElements = listOf("Blue Patterned Button-Down", "Neutral Jacket"),
-                detectedColors = listOf("#1E88E5", "#F5F5F5", "#212121"),
-                colorsDescription = "Bright blue with nice white and dark colors."
+                shortTitle = "Stunning All-Black Outfit",
+                shortDescription = "A sleek black wrap top paired with a flowy midi skirt creates a classy and elegant look.",
+                primaryClothingItem = "Black V-Neck Wrap Top",
+                styleTags = listOf("Elegant", "Chic", "Minimal"),
+                bestForOccasions = listOf("Evening Dinner", "Date Night", "Formal Event"),
+                whatLooksBest = "The all-black color keeps it simple and classy. The wrap top adds a nice shape and the flared skirt balances it perfectly.",
+                whatCouldImprove = "Adding a statement necklace or earrings would elevate this look even more.",
+                outfitElements = listOf("Black V-Neck Wrap Top", "Black Flared Midi Skirt"),
+                detectedColors = listOf("#1A1A1A", "#2C2C2C", "#3D3D3D"),
+                colorsDescription = "All-black tones with subtle depth and texture."
             )
             com.example.styleadvisor.data.AnalysisRepository.addResult(mockResult, uri.toString())
             _uiState.value = AnalysisState.Success(mockResult)

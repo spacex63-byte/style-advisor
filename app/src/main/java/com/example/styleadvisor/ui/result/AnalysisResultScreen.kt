@@ -432,7 +432,7 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                 )
             } else {
                 Image(
-                    painter = painterResource(id = R.drawable.sample_outfit),
+                    painter = painterResource(id = R.drawable.sample_outfit_girl),
                     contentDescription = "Analyzed image",
                     modifier = Modifier.fillMaxSize(),
                     contentScale = androidx.compose.ui.layout.ContentScale.Crop
