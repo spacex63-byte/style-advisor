@@ -604,7 +604,7 @@ fun AnalyzeButtonSection(
                 .background(Brush.horizontalGradient(listOf(Color(0xFFE3F2FD), Color.White)))
                 .border(1.dp, Color.LightGray.copy(alpha = 0.5f), RoundedCornerShape(30.dp))
                 .clickable {
-                    val uri = android.net.Uri.parse("android.resource://${context.packageName}/${com.example.styleadvisor.R.drawable.sample_outfit}")
+                    val uri = android.net.Uri.parse("android.resource://${context.packageName}/${com.example.styleadvisor.R.drawable.sample_outfit_girl}")
                     onImageSelected(uri)
                     onAnalyzeStarted(true)
                 },
