@@ -56,9 +56,14 @@ class AnalysisViewModel : ViewModel() {
                 whatCouldImprove = "Adding a statement necklace or earrings would elevate this look even more.",
                 outfitElements = listOf("Black V-Neck Wrap Top", "Black Flared Midi Skirt"),
                 detectedColors = listOf("#1A1A1A", "#2C2C2C", "#3D3D3D"),
-                colorsDescription = "All-black tones with subtle depth and texture."
+                colorsDescription = "All-black tones with subtle depth and texture. Pairs beautifully with gold, silver, or emerald green accents.",
+                styleTagExplanations = mapOf(
+                    "Elegant" to "Graceful and stylish in appearance or manner, often associated with formal wear.",
+                    "Chic" to "Elegantly and stylishly fashionable.",
+                    "Minimal" to "Characterized by extreme spareness and simplicity."
+                )
             )
-            com.example.styleadvisor.data.AnalysisRepository.addResult(mockResult, uri.toString())
+            // Do NOT save sample data to history repository
             _uiState.value = AnalysisState.Success(mockResult)
             return
         }

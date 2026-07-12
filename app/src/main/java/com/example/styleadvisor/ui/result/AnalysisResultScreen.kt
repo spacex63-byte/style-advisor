@@ -1,5 +1,6 @@
 package com.example.styleadvisor.ui.result
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,8 +22,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -85,11 +92,10 @@ fun AnalysisResultScreen(
                     }
                 }
                 is AnalysisState.Success -> {
-                    Column(
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(innerPadding)
-                            .verticalScroll(rememberScrollState())
                     ) {
                         OverviewContent(result = state.result, imageUri = imageUri)
                     }
@@ -106,42 +112,64 @@ fun AnalysisResultScreen(
 }
 
 @Composable
+fun AnimatedCard(delayMs: Int, content: @Composable () -> Unit) {
+    var visible by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (!visible) {
+            kotlinx.coroutines.delay(delayMs.toLong())
+            visible = true
+        }
+    }
+    androidx.compose.animation.AnimatedVisibility(
+        visible = visible,
+        enter = androidx.compose.animation.slideInVertically(initialOffsetY = { 50 }, animationSpec = androidx.compose.animation.core.tween(500)) + androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(500))
+    ) {
+        content()
+    }
+}
+
+@Composable
 fun OverviewContent(result: AnalysisResult, imageUri: Uri?) {
-    Column {
+    Column(
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
         Spacer(modifier = Modifier.height(16.dp))
-        HeroScoreCard(result = result, imageUri = imageUri)
+        AnimatedCard(delayMs = 0) { HeroScoreCard(result = result, imageUri = imageUri) }
         
         Spacer(modifier = Modifier.height(16.dp))
-        ScoreBreakdownCard(result = result)
+        AnimatedCard(delayMs = 150) { ScoreBreakdownCard(result = result) }
         
         Spacer(modifier = Modifier.height(16.dp))
-        StyleOverviewCard(tags = result.styleTags)
+        AnimatedCard(delayMs = 300) { StyleOverviewCard(result = result) }
         
         Spacer(modifier = Modifier.height(16.dp))
-        BestForCard(occasions = result.bestForOccasions)
+        AnimatedCard(delayMs = 450) { BestForCard(occasions = result.bestForOccasions) }
         
         Spacer(modifier = Modifier.height(16.dp))
-        OutfitElementsCard(elements = result.outfitElements)
+        AnimatedCard(delayMs = 600) { OutfitElementsCard(elements = result.outfitElements) }
         
         Spacer(modifier = Modifier.height(16.dp))
-        DetectedColorsCard(colors = result.detectedColors, description = result.colorsDescription)
+        AnimatedCard(delayMs = 750) { DetectedColorsCard(colors = result.detectedColors, description = result.colorsDescription) }
         
         Spacer(modifier = Modifier.height(16.dp))
-        FeedbackCard(
-            isPositive = true,
-            title = "What Looks Best",
-            description = result.whatLooksBest
-        )
+        AnimatedCard(delayMs = 900) {
+            FeedbackCard(
+                isPositive = true,
+                title = "What Looks Best",
+                description = result.whatLooksBest
+            )
+        }
         
-        Spacer(modifier = Modifier.height(16.dp))
-        FeedbackCard(
-            isPositive = false,
-            title = "What Could Improve",
-            description = result.whatCouldImprove
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        PromoSection()
+        if (result.overallScore < 90) {
+            Spacer(modifier = Modifier.height(16.dp))
+            AnimatedCard(delayMs = 1050) {
+                FeedbackCard(
+                    isPositive = false,
+                    title = "What Could Improve",
+                    description = result.whatCouldImprove
+                )
+            }
+        }
         
         Spacer(modifier = Modifier.height(32.dp))
     }
@@ -339,6 +367,22 @@ fun ResultTopBar(title: String, onBack: () -> Unit) {
 
 @Composable
 fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
+    var animationPlayed by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        animationPlayed = true
+    }
+    
+    val animatedScore by androidx.compose.animation.core.animateIntAsState(
+        targetValue = if (animationPlayed) result.overallScore else 0,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 1500, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+        label = "score"
+    )
+    val animatedProgress by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (animationPlayed) result.overallScore / 100f else 0f,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 1500, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+        label = "progress"
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -363,7 +407,7 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
-                    progress = { result.overallScore / 100f },
+                    progress = { animatedProgress },
                     modifier = Modifier.fillMaxSize(),
                     color = PrimaryBlue,
                     trackColor = Color(0xFFF5F5F5),
@@ -375,7 +419,7 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
                     modifier = Modifier.offset(y = 2.dp)
                 ) {
                     Text(
-                        text = "${result.overallScore}",
+                        text = "$animatedScore",
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextNavyBlue,
@@ -393,12 +437,15 @@ fun HeroScoreCard(result: AnalysisResult, imageUri: Uri?) {
             Spacer(modifier = Modifier.height(12.dp))
             
             Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
-                Text(
+                AutoResizeText(
                     text = result.shortTitle,
-                    fontSize = 18.sp,
+                    fontSize = 16.sp,
+                    minFontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextNavyBlue,
-                    lineHeight = 24.sp
+                    minLines = 2,
+                    maxLines = 2,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -457,7 +504,19 @@ fun NewAttributeGrid(result: AnalysisResult) {
 }
 
 @Composable
+fun getScoreColor(score: Int): Color {
+    return when {
+        score >= 80 -> Color(0xFF4CAF50) // Green
+        score >= 50 -> Color(0xFFFFA000) // Orange
+        else -> Color(0xFFE53935) // Red
+    }
+}
+
+@Composable
 fun NewAttributeCard(modifier: Modifier = Modifier, icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, score: Int) {
+    val scoreColor = getScoreColor(score)
+    val bgColor = scoreColor.copy(alpha = 0.1f)
+    
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
@@ -468,24 +527,24 @@ fun NewAttributeCard(modifier: Modifier = Modifier, icon: androidx.compose.ui.gr
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
-                modifier = Modifier.size(28.dp).clip(CircleShape).background(Color(0xFFF5F5F5)),
+                modifier = Modifier.size(30.dp).clip(CircleShape).background(bgColor),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = icon, contentDescription = null, tint = TextNavyBlue, modifier = Modifier.size(16.dp))
+                Icon(imageVector = icon, contentDescription = null, tint = scoreColor, modifier = Modifier.size(16.dp))
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextNavyBlue, lineHeight = 14.sp)
+            Text(text = label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextNavyBlue, lineHeight = 14.sp)
         }
         Spacer(modifier = Modifier.weight(1f))
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(text = "$score", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = PrimaryBlue, modifier = Modifier.alignByBaseline())
+            Text(text = "$score", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = scoreColor, modifier = Modifier.alignByBaseline())
             Text(text = "/100", fontSize = 12.sp, color = TextMuted, modifier = Modifier.alignByBaseline())
         }
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         LinearProgressIndicator(
             progress = { score / 100f },
-            modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
-            color = PrimaryBlue,
+            modifier = Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(2.5.dp)),
+            color = scoreColor,
             trackColor = Color(0xFFF5F5F5),
             strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
         )
@@ -493,38 +552,99 @@ fun NewAttributeCard(modifier: Modifier = Modifier, icon: androidx.compose.ui.gr
 }
 
 @Composable
-fun StyleOverviewCard(tags: List<String>) {
+fun StyleOverviewCard(result: AnalysisResult) {
+    var selectedTag by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<String?>(null) }
+    var triggerAnimations by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    
+    val configuration = LocalConfiguration.current
+    val screenHeightPx = with(LocalDensity.current) { configuration.screenHeightDp.dp.toPx() }
+    
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(20.dp))
             .background(Color.White)
+            .animateContentSize()
+            .onGloballyPositioned { coordinates ->
+                if (!triggerAnimations) {
+                    val yPos = coordinates.positionInWindow().y
+                    if (yPos < screenHeightPx * 0.6f) { // 40% visible from bottom
+                        triggerAnimations = true
+                    }
+                }
+            }
             .padding(16.dp)
     ) {
         Text(text = "Style Overview", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+        androidx.compose.foundation.layout.FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            tags.forEachIndexed { index, tag ->
-                PillTag(text = tag, isPrimary = index == 0)
+            result.styleTags.forEachIndexed { index, tag ->
+                var visible by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+                LaunchedEffect(triggerAnimations) {
+                    if (!visible) {
+                        kotlinx.coroutines.delay(300 + (index * 150).toLong())
+                        visible = true
+                    }
+                }
+                
+                val scale by androidx.compose.animation.core.animateFloatAsState(
+                    targetValue = if (visible) 1f else 0f,
+                    animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.6f, stiffness = 200f)
+                )
+                Box(modifier = Modifier.scale(scale)) {
+                    PillTag(
+                        text = tag, 
+                        isPrimary = selectedTag == tag || (selectedTag == null && index == 0), 
+                        onClick = { 
+                            selectedTag = if (selectedTag == tag) null else tag 
+                        }
+                    )
+                }
+            }
+        }
+        
+        androidx.compose.animation.AnimatedVisibility(
+            visible = selectedTag != null,
+            enter = androidx.compose.animation.expandVertically() + androidx.compose.animation.fadeIn(),
+            exit = androidx.compose.animation.shrinkVertically() + androidx.compose.animation.fadeOut()
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(16.dp))
+                val explanation = result.styleTagExplanations[selectedTag] ?: "A popular and stylish fashion choice."
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFFF5F8FA))
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = explanation,
+                        fontSize = 13.sp,
+                        color = TextNavyBlue,
+                        lineHeight = 18.sp
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun PillTag(text: String, isPrimary: Boolean) {
+fun PillTag(text: String, isPrimary: Boolean, onClick: () -> Unit = {}) {
     val bgColor = if (isPrimary) TextNavyBlue else Color(0xFFF5F5F5)
     val textColor = if (isPrimary) Color.White else TextNavyBlue
     Box(
         modifier = Modifier
             .clip(CircleShape)
             .background(bgColor)
+            .clickable { onClick() }
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
         Text(text = text, fontSize = 12.sp, fontWeight = FontWeight.Medium, color = textColor)
@@ -543,11 +663,11 @@ fun BestForCard(occasions: List<String>) {
     ) {
         Text(text = "Best For", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = TextNavyBlue)
         Spacer(modifier = Modifier.height(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+        androidx.compose.foundation.layout.FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             val iconMap = mapOf(
                 "Casual Outing" to Icons.Default.Coffee,
@@ -565,10 +685,11 @@ fun BestForCard(occasions: List<String>) {
                 "Interview" to Icons.Default.CoPresent,
                 "Night Club" to Icons.Default.Nightlife,
                 "Outdoor Adventure" to Icons.Default.Terrain,
-                "School/College" to Icons.Default.School
+                "School/College" to Icons.Default.School,
+                "Evening Dinner" to Icons.Default.Restaurant
             )
             
-            occasions.take(3).forEach { occasion ->
+            occasions.take(4).forEachIndexed { index, occasion ->
                 val icon = iconMap[occasion] ?: Icons.Default.Check
                 BestForItem(icon = icon, label = occasion, isSelected = true)
             }
@@ -679,6 +800,22 @@ fun ScoreBreakdownCard(result: AnalysisResult) {
 
 @Composable
 fun ScoreBreakdownItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, score: Int) {
+    var animationPlayed by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        animationPlayed = true
+    }
+    
+    val animatedScore by androidx.compose.animation.core.animateIntAsState(
+        targetValue = if (animationPlayed) score else 0,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 1500, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+        label = "score"
+    )
+    val animatedProgress by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (animationPlayed) score / 100f else 0f,
+        animationSpec = androidx.compose.animation.core.tween(durationMillis = 1500, easing = androidx.compose.animation.core.FastOutSlowInEasing),
+        label = "progress"
+    )
+
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -691,13 +828,13 @@ fun ScoreBreakdownItem(icon: androidx.compose.ui.graphics.vector.ImageVector, la
             Text(text = label, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = TextNavyBlue)
             Spacer(modifier = Modifier.weight(1f))
             Row(verticalAlignment = Alignment.Bottom) {
-                Text(text = "$score", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PrimaryBlue, modifier = Modifier.alignByBaseline())
+                Text(text = "$animatedScore", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PrimaryBlue, modifier = Modifier.alignByBaseline())
                 Text(text = "/100", fontSize = 12.sp, color = TextMuted, modifier = Modifier.alignByBaseline())
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
         LinearProgressIndicator(
-            progress = { score / 100f },
+            progress = { animatedProgress },
             modifier = Modifier.fillMaxWidth().height(4.dp).clip(RoundedCornerShape(2.dp)),
             color = PrimaryBlue,
             trackColor = Color(0xFFF5F5F5),
@@ -729,18 +866,9 @@ fun OutfitElementsCard(elements: List<String>) {
         }
         Spacer(modifier = Modifier.height(16.dp))
         
-        // 2 columns layout
-        val chunked = elements.chunked(maxOf(1, (elements.size + 1) / 2))
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.weight(1f)) {
-                chunked.getOrNull(0)?.forEach { element ->
-                    OutfitElementItem(element)
-                }
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                chunked.getOrNull(1)?.forEach { element ->
-                    OutfitElementItem(element)
-                }
+        Column(modifier = Modifier.fillMaxWidth()) {
+            elements.forEach { element ->
+                OutfitElementItem(element)
             }
         }
     }
@@ -777,11 +905,16 @@ fun DetectedColorsCard(colors: List<String>, description: String) {
         }
         Spacer(modifier = Modifier.height(16.dp))
         
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            colors.forEach { hex ->
+        @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+        androidx.compose.foundation.layout.FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            colors.take(4).forEachIndexed { index, hex ->
                 Box(
                     modifier = Modifier
-                        .size(40.dp)
+                        .size(48.dp) // Made slightly larger to look better when spaced evenly
                         .clip(CircleShape)
                         .background(Color(android.graphics.Color.parseColor(if (hex.startsWith("#")) hex else "#$hex")))
                         .border(1.dp, Color(0xFFF0F0F0), CircleShape)
@@ -889,4 +1022,52 @@ fun UpgradeProCard() {
             }
         }
     }
+}
+
+@Composable
+fun AutoResizeText(
+    text: String,
+    fontSize: androidx.compose.ui.unit.TextUnit,
+    minFontSize: androidx.compose.ui.unit.TextUnit,
+    color: Color = Color.Unspecified,
+    fontWeight: FontWeight? = null,
+    modifier: Modifier = Modifier,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1
+) {
+    var resizedFontSize by androidx.compose.runtime.remember(text) {
+        androidx.compose.runtime.mutableStateOf(fontSize)
+    }
+    var shouldDraw by androidx.compose.runtime.remember(text) {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
+    val defaultFontSize = fontSize
+
+    Text(
+        text = text,
+        color = color,
+        fontWeight = fontWeight,
+        fontSize = resizedFontSize,
+        maxLines = maxLines,
+        minLines = minLines,
+        softWrap = true,
+        lineHeight = resizedFontSize * 1.3f,
+        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+        modifier = modifier.drawWithContent {
+            if (shouldDraw) {
+                drawContent()
+            }
+        },
+        onTextLayout = { result ->
+            if (result.didOverflowHeight || result.didOverflowWidth) {
+                if (resizedFontSize.value > minFontSize.value) {
+                    resizedFontSize = (resizedFontSize.value * 0.95f).sp
+                } else {
+                    shouldDraw = true
+                }
+            } else {
+                shouldDraw = true
+            }
+        }
+    )
 }

@@ -215,10 +215,10 @@ fun HomeContent(
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(4.dp))
-        TopAppBarSection()
+        Spacer(modifier = Modifier.height(2.dp))
+        TopAppBarSection(onItemClick = onItemClick)
         
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(7.dp))
         HeroSection()
         
         Spacer(modifier = Modifier.height(20.dp))
@@ -230,8 +230,8 @@ fun HomeContent(
             onAnalyzeComplete = onAnalyzeComplete
         )
         
-        Spacer(modifier = Modifier.height(32.dp))
-        PromoSection()
+        // Spacer(modifier = Modifier.height(32.dp))
+        // PromoSection()
         
         // Add bottom padding to ensure there's enough space to scroll past the bottom nav bar
         Spacer(modifier = Modifier.height(60.dp))
@@ -239,7 +239,7 @@ fun HomeContent(
 }
 
 @Composable
-fun TopAppBarSection() {
+fun TopAppBarSection(onItemClick: (NavKey) -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -262,7 +262,7 @@ fun TopAppBarSection() {
             )
         }
 
-        IconButton(onClick = { }) {
+        IconButton(onClick = { onItemClick(com.example.styleadvisor.Notifications) }) {
             Icon(
                 imageVector = Icons.Filled.Notifications,
                 contentDescription = "Notifications",
@@ -286,7 +286,7 @@ fun HeroSection() {
             lineHeight = 36.sp,
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
         Text(
             text = "Upload your outfit photo and get\npersonalized style insights instantly.",
             fontSize = 14.sp,
@@ -552,7 +552,7 @@ fun AnalyzeButtonSection(
             }
         }
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         if (selectedImageUri == null) {
             Button(
@@ -575,7 +575,7 @@ fun AnalyzeButtonSection(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Take Photo", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -592,7 +592,7 @@ fun AnalyzeButtonSection(
                 HorizontalDivider(modifier = Modifier.width(80.dp), color = Color.LightGray.copy(alpha = 0.5f))
             }
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
         
         // Try with Sample

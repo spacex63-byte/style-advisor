@@ -24,5 +24,6 @@ data class AnalysisResult(
     val outfitElements: List<String> = emptyList(),
     val detectedColors: List<String> = emptyList(), // Hex strings
     val colorsDescription: String = "",
-    val personalizedTips: List<Tip> = emptyList()
+    val personalizedTips: List<Tip> = emptyList(),
+    val styleTagExplanations: Map<String, String> = emptyMap()
 )

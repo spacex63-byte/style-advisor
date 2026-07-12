@@ -21,7 +21,11 @@ import com.example.styleadvisor.ui.profile.ProfileViewModel
 
 @Composable
 fun MainNavigation() {
-  val backStack = rememberNavBackStack(Onboarding)
+  val context = androidx.compose.ui.platform.LocalContext.current
+  val sharedPreferences = context.getSharedPreferences("styleadvisor_prefs", android.content.Context.MODE_PRIVATE)
+  val onboardingCompleted = sharedPreferences.getBoolean("onboarding_completed", false)
+  
+  val backStack = rememberNavBackStack(if (onboardingCompleted) Main else Onboarding)
   val analysisViewModel: AnalysisViewModel = viewModel()
   val profileViewModel: ProfileViewModel = viewModel()
 
@@ -35,6 +39,7 @@ fun MainNavigation() {
         entry<Onboarding> {
           com.example.styleadvisor.ui.onboarding.OnboardingScreen(
             onGetStarted = { 
+                sharedPreferences.edit().putBoolean("onboarding_completed", true).apply()
                 backStack.removeLastOrNull()
                 backStack.add(Main) 
             }

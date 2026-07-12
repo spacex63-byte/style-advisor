@@ -26,6 +26,9 @@ class ProfileViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ProfileState())
     val uiState: StateFlow<ProfileState> = _uiState
 
+    private val _styleProfileState = MutableStateFlow(StyleProfileData())
+    val styleProfileState: StateFlow<StyleProfileData> = _styleProfileState
+
     init {
         viewModelScope.launch {
             com.example.styleadvisor.data.AnalysisRepository.history.collect { historyList ->
@@ -38,9 +41,11 @@ class ProfileViewModel : ViewModel() {
                     // The chart expects values left-to-right (oldest to newest), but historyList is newest first.
                     // So we take up to 5, and reverse it.
                     val rawRecent = historyList.take(5).reversed().map { it.result.overallScore / 100f }
-                    // Pad to 5 items to prevent IndexOutOfBounds in the graph
+                    // Pad to 5 items to prevent IndexOutOfBounds in the graph.
+                    // Pad with the oldest available score to prevent unrealistic dips to zero.
+                    val paddingValue = rawRecent.firstOrNull() ?: 0.5f
                     val recent = if (rawRecent.size < 5) {
-                        MutableList(5 - rawRecent.size) { 0f } + rawRecent
+                        MutableList(5 - rawRecent.size) { paddingValue } + rawRecent
                     } else {
                         rawRecent
                     }
@@ -54,8 +59,7 @@ class ProfileViewModel : ViewModel() {
                         avgScore = avg,
                         outfitIdeas = ideas,
                         recentScores = recent,
-                        topStyle = top,
-                        styleProfileProgress = (count / 10f).coerceAtMost(1.0f) // Arbitrary progress logic based on scans
+                        topStyle = top
                     )
                 } else {
                     // Reset to zero if history is cleared
@@ -64,8 +68,7 @@ class ProfileViewModel : ViewModel() {
                         avgScore = 0,
                         outfitIdeas = 0,
                         recentScores = listOf(0f, 0f, 0f, 0f, 0f),
-                        topStyle = "Unknown",
-                        styleProfileProgress = 0.0f
+                        topStyle = "Unknown"
                     )
                 }
             }
@@ -110,16 +113,64 @@ class ProfileViewModel : ViewModel() {
         if (file.exists()) {
             _uiState.value = _uiState.value.copy(profileImageUri = Uri.fromFile(file))
         }
+        
+        // Also load style profile data here since this is called on screen launch
+        loadStyleProfileData(context)
     }
 
-    fun updateStyleProfileProgress(progress: Float) {
-        // e.g. update score and progress
-        val newAvg = if (progress > 0.5f) 92 else 87
-        val newRecent = if (progress > 0.5f) listOf(0.5f, 0.7f, 0.8f, 0.9f, 0.95f) else listOf(0.7f, 0.65f, 0.45f, 0.48f, 0.25f)
-        _uiState.value = _uiState.value.copy(
-            styleProfileProgress = progress,
-            avgScore = newAvg,
-            recentScores = newRecent
+    fun loadStyleProfileData(context: Context) {
+        val prefs = context.getSharedPreferences("style_profile_prefs", Context.MODE_PRIVATE)
+        val data = StyleProfileData(
+            preferredStyles = prefs.getStringSet("preferredStyles", emptySet()) ?: emptySet(),
+            favoriteColors = prefs.getStringSet("favoriteColors", emptySet()) ?: emptySet(),
+            fitPreferences = prefs.getStringSet("fitPreferences", emptySet()) ?: emptySet(),
+            bodyType = prefs.getStringSet("bodyType", emptySet()) ?: emptySet(),
+            skinTone = prefs.getStringSet("skinTone", emptySet()) ?: emptySet(),
+            gender = prefs.getStringSet("gender", emptySet()) ?: emptySet(),
+            ageGroup = prefs.getStringSet("ageGroup", emptySet()) ?: emptySet(),
+            budget = prefs.getStringSet("budget", emptySet()) ?: emptySet(),
+            occasions = prefs.getStringSet("occasions", emptySet()) ?: emptySet(),
+            preferredBrands = prefs.getString("preferredBrands", "") ?: "",
+            height = prefs.getString("height", "") ?: "",
+            weight = prefs.getString("weight", "") ?: ""
         )
+        _styleProfileState.value = data
+        _uiState.value = _uiState.value.copy(styleProfileProgress = prefs.getFloat("styleProfileProgress", 0f))
+    }
+
+    fun saveStyleProfileData(context: Context, data: StyleProfileData) {
+        _styleProfileState.value = data
+        
+        var filled = 0
+        if (data.preferredStyles.isNotEmpty()) filled++
+        if (data.favoriteColors.isNotEmpty()) filled++
+        if (data.fitPreferences.isNotEmpty()) filled++
+        if (data.bodyType.isNotEmpty()) filled++
+        if (data.skinTone.isNotEmpty()) filled++
+        if (data.gender.isNotEmpty()) filled++
+        if (data.ageGroup.isNotEmpty()) filled++
+        if (data.budget.isNotEmpty()) filled++
+        if (data.occasions.isNotEmpty()) filled++
+        
+        val progress = if (filled > 0) filled.toFloat() / 9 else 0f
+        
+        val prefs = context.getSharedPreferences("style_profile_prefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putStringSet("preferredStyles", data.preferredStyles)
+            .putStringSet("favoriteColors", data.favoriteColors)
+            .putStringSet("fitPreferences", data.fitPreferences)
+            .putStringSet("bodyType", data.bodyType)
+            .putStringSet("skinTone", data.skinTone)
+            .putStringSet("gender", data.gender)
+            .putStringSet("ageGroup", data.ageGroup)
+            .putStringSet("budget", data.budget)
+            .putStringSet("occasions", data.occasions)
+            .putString("preferredBrands", data.preferredBrands)
+            .putString("height", data.height)
+            .putString("weight", data.weight)
+            .putFloat("styleProfileProgress", progress)
+            .apply()
+            
+        _uiState.value = _uiState.value.copy(styleProfileProgress = progress)
     }
 }

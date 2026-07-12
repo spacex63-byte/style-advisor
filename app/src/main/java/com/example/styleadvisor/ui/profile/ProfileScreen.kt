@@ -55,6 +55,15 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}, viewModel: ProfileViewMod
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     var showEditDialog by remember { mutableStateOf(false) }
+    var editingField by remember { mutableStateOf<String?>(null) }
+    
+    if (editingField != null) {
+        StyleEditSheet(
+            editingField = editingField!!,
+            viewModel = viewModel,
+            onDismiss = { editingField = null }
+        )
+    }
     
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { viewModel.updateProfileImage(context, it) }
@@ -308,77 +317,11 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}, viewModel: ProfileViewMod
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Style Profile Card
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
-                .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(Color(0xFFF0F4FF))
-                .clickable { onItemClick(com.example.styleadvisor.StyleProfile) }
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(Color.White)
-                    .border(1.dp, SurfaceVariant, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_cloth),
-                    contentDescription = null,
-                    tint = TextNavyBlue,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy((-2).dp)
-            ) {
-                Text(
-                    text = "Style Profile",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextNavyBlue
-                )
-                Text(
-                    text = "Complete your style profile",
-                    fontSize = 11.sp,
-                    color = TextMuted
-                )
-            }
-            
-            Box(
-                modifier = Modifier.size(40.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    progress = { state.styleProfileProgress },
-                    modifier = Modifier.fillMaxSize(),
-                    color = ScoreHigh,
-                    strokeWidth = 3.dp,
-                    trackColor = SurfaceVariant,
-                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round
-                )
-                Text(
-                    text = "${(state.styleProfileProgress * 100).toInt()}%",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextNavyBlue
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(12.dp))
-            
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = TextMuted)
-        }
+        // Style Profile Summary directly in Profile Screen
+        StyleProfileSummary(
+            data = viewModel.styleProfileState.collectAsState().value,
+            onEditItem = { field -> editingField = field }
+        )
         
         Spacer(modifier = Modifier.height(24.dp))
         
@@ -431,8 +374,8 @@ fun StatItem(value: String, label: String) {
 
 @Composable
 fun GraphCard(state: ProfileState) {
-    val graphBg = Color(0xFFF0F4FA)
-    val lineColor = Color(0xFF3C60F4)
+    val graphBg = Color.White
+    val lineColor = PrimaryBlue
     
     val animationProgress = remember { androidx.compose.animation.core.Animatable(0f) }
     LaunchedEffect(state.recentScores) {
@@ -479,26 +422,6 @@ fun GraphCard(state: ProfileState) {
                             color = Color(0xFF6B7A99),
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        
-                        Spacer(modifier = Modifier.width(16.dp))
-                        
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(bottom = 12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropUp,
-                                contentDescription = null,
-                                tint = Color(0xFF4CAF50),
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Text(
-                                text = "12%",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF4CAF50)
-                            )
-                        }
                     }
                 }
             }
@@ -522,7 +445,7 @@ fun GraphCard(state: ProfileState) {
                     val path = Path()
                     points.forEachIndexed { index, (xRatio, yRatio) ->
                         val x = xRatio * w
-                        val y = yRatio * h
+                        val y = (1f - yRatio) * h
                         if (index == 0) {
                             path.moveTo(x, y)
                         } else {
@@ -566,7 +489,7 @@ fun GraphCard(state: ProfileState) {
                     points.forEachIndexed { index, (xRatio, yRatio) ->
                         if ((index / (points.size - 1).toFloat()) <= animationProgress.value) {
                             val x = xRatio * w
-                            val y = yRatio * h
+                            val y = (1f - yRatio) * h
                             drawCircle(
                                 color = lineColor,
                                 radius = 5.dp.toPx(),

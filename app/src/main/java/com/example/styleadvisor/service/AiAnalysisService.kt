@@ -41,15 +41,16 @@ class AiAnalysisService {
             }
             
             ONLY if the image clearly contains a person wearing an outfit, proceed to analyze it and provide a realistic fashion analysis.
-            CRITICAL INSTRUCTION: You MUST provide HONEST, STRICT, and REALISTIC feedback. DO NOT flatter the user. If the outfit is mismatched, poorly fitted, messy, or lacks style, you MUST give LOW scores (e.g., 30s-60s) and explicitly criticize it in `whatCouldImprove` and `shortTitle` (e.g., "Messy", "Mismatched", "Needs Work"). Only give high scores (80s-90s) if the outfit is genuinely excellent.
+            CRITICAL INSTRUCTION: You MUST provide HONEST, STRICT, and REALISTIC feedback. DO NOT flatter the user. If the user has worn bad clothes, is poorly dressed, mismatched, or the outfit lacks style, you MUST give VERY LOW scores (e.g., 10, 11, 12, 15, 20) and explicitly criticize it in `whatCouldImprove` and `shortTitle` (e.g., "Messy", "Mismatched", "Needs Work", "Disaster"). Only give high scores (80s-90s) if the outfit is genuinely excellent. If it's average, give 40-60. Do NOT default to high scores.
             
             1. `shortTitle`: Max 1 or 2 words based on the person/outfit (e.g., "Handsome", "Beautiful", "Dapper", "Stunning", "Messy", "Mismatched", "Needs Work").
             2. `shortDescription`: Max 2 lines of description based on the actual outfit and photo. Be honest.
             3. `primaryClothingItem`: The most prominent piece of clothing they are wearing (max 3 words, e.g., "Blue Denim Jacket").
-            4. `styleTags`: Pick 2 to 4 styles from this list exactly: [Smart Casual, Casual, Business Casual, Formal, Streetwear, Vintage, Minimalist, Y2K, Bohemian, Grunge, Preppy, Athleisure, Cyberpunk, Goth, Chic, Classic, Retro, Hip Hop, Skater, Techwear, Dark Academia, Light Academia, Cottagecore, Punk, Rock, Old Money, Sporty, Safari, Nautical, Resort, Loungewear, Western, Military, Artsy, Monochrome, Pastel, Workwear, Avant-Garde].
-            5. `bestForOccasions`: Pick 2 to 4 occasions from this list exactly: [Casual Outing, Date Night, Office/Work, Party, Formal Event, Workout/Gym, Travel, Weekend Brunch, Beach/Resort, Wedding Guest, Concert/Festival, Lounging at Home, Interview, Night Club, Outdoor Adventure, School/College].
+            4. `styleTags`: Pick 2 to 4 styles from this list exactly: [Casual, Formal, Party Wear, Street Style, Simple & Clean, Sporty, Traditional, Trendy, Everyday Wear, Office Wear, Relaxed, Elegant, Vintage, Bold, Minimalist].
+            5. `bestForOccasions`: Pick 2 to 4 occasions from this list exactly: [Casual Outing, Date Night, Office/Work, Party, Formal Event, Workout/Gym, Travel, Weekend Brunch, Beach/Resort, Wedding Guest, Concert/Festival, Lounging at Home, Interview, Night Club, Outdoor Adventure, School/College, Evening Dinner].
             6. Scores (`overallScore`, `colorHarmonyScore`, `fitScore`, `styleScore`): Must be REALISTIC out of 100. DO NOT default to high scores. Use the full 0-100 range.
-            7. `whatLooksBest`, `whatCouldImprove`, `outfitElements`, `detectedColors`: Analyze realistically based on the image. Give actionable, strict advice in `whatCouldImprove`.
+            7. `whatLooksBest`, `whatCouldImprove`, `outfitElements`, `detectedColors`: Analyze realistically based on the image. Give actionable, strict advice in `whatCouldImprove`. For `colorsDescription`, describe the colors AND explicitly suggest which other colors would pair well with them.
+            8. `styleTagExplanations`: For each tag you picked in `styleTags`, provide a 1-2 line explanation of what that style means. This should be a key-value map.
             
             Return the output STRICTLY in the following JSON format without markdown blocks:
             {
@@ -65,7 +66,12 @@ class AiAnalysisService {
                 "whatLooksBest": "The earthy tones and clean layering...",
                 "whatCouldImprove": "Try adding a statement accessory...",
                 "outfitElements": ["Leather Jacket", "White T-Shirt", "Black Jeans"],
-                "detectedColors": ["#000000", "#FFFFFF", "#8B4513"]
+                "detectedColors": ["#000000", "#FFFFFF", "#8B4513"],
+                "colorsDescription": "Classic black and white base with earthy brown accents. Pairs beautifully with olive green, muted mustard, or silver accessories.",
+                "styleTagExplanations": {
+                    "Street Style": "A casual, comfortable fashion style that takes inspiration from everyday street culture.",
+                    "Minimalist": "Focuses on simplicity, clean lines, and neutral colors without excessive accessories."
+                }
             }
         """.trimIndent()
         

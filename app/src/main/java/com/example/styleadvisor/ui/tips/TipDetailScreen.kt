@@ -1,6 +1,7 @@
 package com.example.styleadvisor.ui.tips
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -34,6 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.painterResource
+import com.example.styleadvisor.R
 import com.example.styleadvisor.theme.*
 
 data class TipContentInfo(val description: String, val steps: List<String>, val proTip: String, val recommendedColors: String? = null)
@@ -192,10 +195,10 @@ fun TipDetailScreen(
             
             Text(
                 text = title,
-                fontSize = 28.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextNavyBlue,
-                lineHeight = 34.sp
+                lineHeight = 30.sp
             )
             
             Spacer(modifier = Modifier.height(20.dp))
@@ -207,30 +210,25 @@ fun TipDetailScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
+                    Image(
+                        painter = painterResource(id = R.drawable.img_style_expert),
+                        contentDescription = "Style Expert",
                         modifier = Modifier
                             .size(40.dp)
-                            .clip(CircleShape)
-                            .background(SurfaceVariant)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = null,
-                            modifier = Modifier.align(Alignment.Center),
-                            tint = TextMuted
-                        )
-                    }
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
                             text = "Style Expert",
-                            fontSize = 14.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextNavyBlue
                         )
                         Text(
                             text = "Fashion Advisor",
-                            fontSize = 12.sp,
+                            fontSize = 11.sp,
                             color = TextMuted
                         )
                     }
@@ -239,12 +237,12 @@ fun TipDetailScreen(
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = "May 12, 2025",
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         color = TextMuted
                     )
                     Text(
                         text = "1-2 min read",
-                        fontSize = 12.sp,
+                        fontSize = 11.sp,
                         color = TextMuted
                     )
                 }
@@ -254,9 +252,9 @@ fun TipDetailScreen(
             
             Text(
                 text = contentInfo.description,
-                fontSize = 15.sp,
+                fontSize = 14.sp,
                 color = TextNavyBlue.copy(alpha = 0.8f),
-                lineHeight = 24.sp
+                lineHeight = 22.sp
             )
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -266,7 +264,7 @@ fun TipDetailScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = "${index + 1}. ${step.substringBefore(':')}",
-                            fontSize = 18.sp,
+                            fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextNavyBlue
                         )
@@ -274,9 +272,9 @@ fun TipDetailScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = step.substringAfter(':').trim(),
-                                fontSize = 14.sp,
+                                fontSize = 13.sp,
                                 color = TextMuted,
-                                lineHeight = 22.sp
+                                lineHeight = 20.sp
                             )
                         }
                     }
@@ -297,7 +295,7 @@ fun TipDetailScreen(
                     Column {
                         Text(
                             text = "Recommended Color Combinations",
-                            fontSize = 14.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextNavyBlue
                         )
@@ -328,7 +326,7 @@ fun TipDetailScreen(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "Pro Tip",
-                            fontSize = 14.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextNavyBlue
                         )
@@ -336,9 +334,9 @@ fun TipDetailScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = contentInfo.proTip,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         color = TextNavyBlue.copy(alpha = 0.8f),
-                        lineHeight = 22.sp
+                        lineHeight = 20.sp
                     )
                 }
             }
@@ -449,7 +447,7 @@ fun ColorPaletteColumn(colorsString: String) {
                     
                     Text(
                         text = combo,
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = TextNavyBlue
                     )
