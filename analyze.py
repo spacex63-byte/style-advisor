@@ -1,6 +1,7 @@
 import base64
 import requests
 import json
+import os
 
 with open("app/src/main/res/drawable/sample_outfit.png", "rb") as image_file:
     encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
@@ -40,7 +41,7 @@ payload = {
 }
 
 headers = {
-  "Authorization": "Bearer rsk_01KX88J6PWVR445J212J4MYB3J",
+  "Authorization": f"Bearer {os.environ.get('MESH_API_KEY', '')}",
   "Content-Type": "application/json"
 }
 
