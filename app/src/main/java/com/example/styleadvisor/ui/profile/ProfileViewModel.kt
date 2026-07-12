@@ -80,12 +80,23 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val inputStream = context.contentResolver.openInputStream(uri)
-                val file = File(context.filesDir, "profile_pic.jpg")
+                val fileName = "profile_pic_${System.currentTimeMillis()}.jpg"
+                val file = File(context.filesDir, fileName)
+                
+                // Delete old profile pics to save space
+                context.filesDir.listFiles { _, name -> name.startsWith("profile_pic_") }?.forEach { it.delete() }
+                // Also delete the old default one if it exists
+                File(context.filesDir, "profile_pic.jpg").delete()
+                
                 val outputStream = FileOutputStream(file)
                 inputStream?.copyTo(outputStream)
                 inputStream?.close()
                 outputStream.close()
                 _uiState.value = _uiState.value.copy(profileImageUri = Uri.fromFile(file))
+                
+                // Save the new file name in SharedPreferences
+                val prefs = context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+                prefs.edit().putString("profile_pic_name", fileName).apply()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -93,7 +104,9 @@ class ProfileViewModel : ViewModel() {
     }
     
     fun loadProfileImage(context: Context) {
-        val file = File(context.filesDir, "profile_pic.jpg")
+        val prefs = context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+        val fileName = prefs.getString("profile_pic_name", "profile_pic.jpg")
+        val file = File(context.filesDir, fileName ?: "profile_pic.jpg")
         if (file.exists()) {
             _uiState.value = _uiState.value.copy(profileImageUri = Uri.fromFile(file))
         }
