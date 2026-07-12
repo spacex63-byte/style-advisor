@@ -38,8 +38,12 @@ val PaletteWhite = Color(0xFFFFFFFF)
 val PaletteBrown = Color(0xFF8D532C)
 val PaletteBlack = Color(0xFF1E2125)
 
-val GlobalBackgroundGradient = androidx.compose.ui.graphics.Brush.verticalGradient(
-    colors = listOf(ThemeLightBlue, Color.White)
+val GlobalBackgroundGradient = androidx.compose.ui.graphics.Brush.radialGradient(
+    0.0f to Color(0xFFE7EEFF),
+    0.35f to Color(0xFFEEF4FF),
+    0.65f to Color(0xFFF7F9FF),
+    1.0f to Color(0xFFFFFFFF),
+    radius = 1500f
 )
 
 // Category Badge Colors

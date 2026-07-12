@@ -7,10 +7,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Straighten
+import androidx.compose.material.icons.filled.Watch
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -19,18 +26,55 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation3.runtime.NavKey
+import coil.compose.AsyncImage
+import com.example.styleadvisor.TipDetail
 import com.example.styleadvisor.theme.*
 
+data class TipCategory(val name: String, val icon: ImageVector)
+
+val tipCategories = listOf(
+    TipCategory("All", Icons.Default.AutoAwesome),
+    TipCategory("Outfit", Icons.Default.Checkroom),
+    TipCategory("Colors", Icons.Default.Palette),
+    TipCategory("Fit", Icons.Default.Straighten),
+    TipCategory("Grooming", Icons.Default.Face),
+    TipCategory("Accessories", Icons.Default.Watch)
+)
+
+data class TipData(
+    val title: String,
+    val subtitle: String,
+    val category: String,
+    val bgCol: Color,
+    val txtCol: Color,
+    val imageUrl: String
+)
+
+val featuredTips = listOf(
+    TipData("5 Color Combinations That Always Work", "Learn how to combine colors like a pro and elevate your look.", "Colors", BadgeOrangeBg, BadgeOrangeText, "https://images.unsplash.com/photo-1516257984-b1b4d707412e?q=80&w=600&auto=format&fit=crop"),
+    TipData("Essential Wardrobe Pieces", "Build a versatile foundation for any season.", "Outfit", BadgePurpleBg, BadgePurpleText, "https://images.unsplash.com/photo-1489987707023-afc31613f8c8?q=80&w=600&auto=format&fit=crop")
+)
+
+val popularTips = listOf(
+    TipData("How to Build a Capsule Wardrobe", "Essential pieces for effortless style every day.", "Outfit", BadgePurpleBg, BadgePurpleText, "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=400&auto=format&fit=crop"),
+    TipData("Perfect Fit Guide for Every Body Type", "Look sharp by wearing the right fit.", "Fit", BadgeGreenBg, BadgeGreenText, "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=400&auto=format&fit=crop"),
+    TipData("White Sneakers: Style Essential", "How to style white sneakers with anything.", "Outfit", BadgeBlueBg, BadgeBlueText, "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=400&auto=format&fit=crop"),
+    TipData("Grooming Habits That Change Your Look", "Small habits, big impact.", "Grooming", BadgeGreenBg, BadgeGreenText, "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=400&auto=format&fit=crop"),
+    TipData("Accessories That Elevate Your Outfit", "The right accessories make all the difference.", "Accessories", BadgeYellowBg, BadgeYellowText, "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?q=80&w=400&auto=format&fit=crop")
+)
+
 @Composable
-fun TipsContent() {
+fun TipsContent(onItemClick: (NavKey) -> Unit = {}) {
     var selectedCategory by remember { mutableStateOf("All") }
-    val categories = listOf("All", "Outfit", "Colors", "Fit", "Grooming", "Accessories")
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(4.dp))
         
         // Header
         Row(
@@ -43,13 +87,13 @@ fun TipsContent() {
             Column {
                 Text(
                     text = "Style Tips",
-                    fontSize = 32.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextNavyBlue
                 )
                 Text(
                     text = "Expert tips to upgrade your style",
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     color = TextMuted
                 )
             }
@@ -73,125 +117,226 @@ fun TipsContent() {
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        // Category Chips
+        // Category Chips (Icon + Text)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            categories.forEach { category ->
-                CategoryChip(
-                    text = category,
-                    isSelected = selectedCategory == category,
-                    onClick = { selectedCategory = category }
+            tipCategories.forEach { category ->
+                CategoryIconChip(
+                    category = category,
+                    isSelected = selectedCategory == category.name,
+                    onClick = { selectedCategory = category.name }
                 )
             }
         }
         
         Spacer(modifier = Modifier.height(24.dp))
         
-        Text(
-            text = "All Tips",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextNavyBlue,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
         Column(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
         ) {
-            TipCard(
-                title = "Layering Tips for Every Season",
-                subtitle = "Layer smart, stay stylish.",
-                category = "Outfit",
-                bgCol = BadgePurpleBg,
-                txtCol = BadgePurpleText
+            // Featured Tips Section
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Featured Tips",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextNavyBlue
+                )
+                Text(
+                    text = "See all",
+                    fontSize = 14.sp,
+                    color = TextMuted,
+                    modifier = Modifier.clickable { }
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState())
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                featuredTips.forEach { tip ->
+                    FeaturedTipCard(tip = tip, onClick = { onItemClick(TipDetail(tip.title, tip.category)) })
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Text(
+                text = "Popular Tips",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextNavyBlue,
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
             
-            TipCard(
-                title = "Neutral Tones Never Fail",
-                subtitle = "Why neutrals are the foundation of great style.",
-                category = "Colors",
-                bgCol = BadgeOrangeBg,
-                txtCol = BadgeOrangeText
-            )
+            Spacer(modifier = Modifier.height(16.dp))
             
-            TipCard(
-                title = "White Sneakers:\nStyle Essential",
-                subtitle = "How to style white sneakers\nwith anything.",
-                category = "Footwear",
-                bgCol = BadgeBlueBg,
-                txtCol = BadgeBlueText
-            )
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                popularTips.forEach { tip ->
+                    TipCard(tip = tip, onClick = { onItemClick(TipDetail(tip.title, tip.category)) })
+                }
+            }
             
-            TipCard(
-                title = "Grooming Habits That\nChange Your Look",
-                subtitle = "Small habits, big impact.",
-                category = "Grooming",
-                bgCol = BadgeGreenBg,
-                txtCol = BadgeGreenText
-            )
-            
-            TipCard(
-                title = "Accessories That\nElevate Your Outfit",
-                subtitle = "The right accessories make\nall the difference.",
-                category = "Accessories",
-                bgCol = BadgeYellowBg,
-                txtCol = BadgeYellowText
+            Spacer(modifier = Modifier.height(100.dp))
+        }
+    }
+}
+
+@Composable
+fun CategoryIconChip(category: TipCategory, isSelected: Boolean, onClick: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.clickable { onClick() }
+    ) {
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .clip(CircleShape)
+                .background(if (isSelected) TextNavyBlue else Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = category.icon,
+                contentDescription = category.name,
+                tint = if (isSelected) Color.White else TextNavyBlue,
+                modifier = Modifier.size(28.dp)
             )
         }
-        
-        Spacer(modifier = Modifier.height(100.dp))
-    }
-}
-
-@Composable
-fun CategoryChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(if (isSelected) TextNavyBlue else SurfaceVariant)
-            .clickable { onClick() }
-            .padding(horizontal = 20.dp, vertical = 12.dp),
-        contentAlignment = Alignment.Center
-    ) {
+        Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = text,
-            fontSize = 14.sp,
-            fontWeight = if (isSelected) FontWeight.Medium else FontWeight.SemiBold,
-            color = if (isSelected) Color.White else TextMuted
+            text = category.name,
+            fontSize = 12.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            color = if (isSelected) TextNavyBlue else TextMuted
         )
     }
 }
 
 @Composable
-fun TipCard(title: String, subtitle: String, category: String, bgCol: Color, txtCol: Color) {
+fun FeaturedTipCard(tip: TipData, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .width(320.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(Color.White)
+            .clickable { onClick() }
+            .padding(16.dp)
+    ) {
+        Row {
+            // Image
+            AsyncImage(
+                model = tip.imageUrl,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(16.dp))
+            )
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            // Content
+            Column(
+                modifier = Modifier.height(160.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = tip.title,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextNavyBlue,
+                        lineHeight = 22.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = tip.subtitle,
+                        fontSize = 13.sp,
+                        color = TextMuted,
+                        lineHeight = 18.sp
+                    )
+                }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(tip.bgCol)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = tip.category,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = tip.txtCol
+                        )
+                    }
+                    
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(TextNavyBlue),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Read",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TipCard(tip: TipData, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
             .background(Color.White)
+            .clickable { onClick() }
             .padding(16.dp)
     ) {
-        Box(
+        AsyncImage(
+            model = tip.imageUrl,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(100.dp)
                 .clip(RoundedCornerShape(16.dp))
-                .background(SurfaceVariant)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                modifier = Modifier.align(Alignment.Center).size(48.dp),
-                tint = TextMuted.copy(alpha = 0.3f)
-            )
-        }
+        )
         
         Spacer(modifier = Modifier.width(16.dp))
         
@@ -202,7 +347,7 @@ fun TipCard(title: String, subtitle: String, category: String, bgCol: Color, txt
                 verticalAlignment = Alignment.Top
             ) {
                 Text(
-                    text = title,
+                    text = tip.title,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextNavyBlue,
@@ -223,7 +368,7 @@ fun TipCard(title: String, subtitle: String, category: String, bgCol: Color, txt
             Spacer(modifier = Modifier.height(6.dp))
             
             Text(
-                text = subtitle,
+                text = tip.subtitle,
                 fontSize = 12.sp,
                 color = TextMuted,
                 lineHeight = 16.sp
@@ -234,14 +379,14 @@ fun TipCard(title: String, subtitle: String, category: String, bgCol: Color, txt
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(12.dp))
-                    .background(bgCol)
+                    .background(tip.bgCol)
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = category,
+                    text = tip.category,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    color = txtCol
+                    color = tip.txtCol
                 )
             }
         }

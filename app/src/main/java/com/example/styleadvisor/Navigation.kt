@@ -21,7 +21,7 @@ import com.example.styleadvisor.ui.profile.ProfileViewModel
 
 @Composable
 fun MainNavigation() {
-  val backStack = rememberNavBackStack(Main)
+  val backStack = rememberNavBackStack(Onboarding)
   val analysisViewModel: AnalysisViewModel = viewModel()
   val profileViewModel: ProfileViewModel = viewModel()
 
@@ -32,6 +32,14 @@ fun MainNavigation() {
     onBack = { backStack.removeLastOrNull() },
     entryProvider =
       entryProvider {
+        entry<Onboarding> {
+          com.example.styleadvisor.ui.onboarding.OnboardingScreen(
+            onGetStarted = { 
+                backStack.removeLastOrNull()
+                backStack.add(Main) 
+            }
+          )
+        }
         entry<Main> {
           MainScreen(onItemClick = { navKey -> backStack.add(navKey) }, modifier = Modifier, viewModel = analysisViewModel, profileViewModel = profileViewModel)
         }
@@ -46,6 +54,17 @@ fun MainNavigation() {
         }
         entry<StyleProfile> {
           StyleProfileScreen(onBack = { backStack.removeLastOrNull() }, viewModel = profileViewModel)
+        }
+        entry<Notifications> {
+          com.example.styleadvisor.ui.notifications.NotificationScreen(onBack = { backStack.removeLastOrNull() })
+        }
+        entry<TipDetail> {
+          com.example.styleadvisor.ui.tips.TipDetailScreen(
+            title = it.title,
+            category = it.category,
+            imageRes = it.imageRes,
+            onBack = { backStack.removeLastOrNull() }
+          )
         }
       },
   )

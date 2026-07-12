@@ -30,66 +30,66 @@ import com.example.styleadvisor.theme.*
 fun HelpSupportScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Help & Support", fontWeight = FontWeight.Bold, color = TextNavyBlue) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextNavyBlue)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = ThemeLightBlue)
-            )
-        },
-        containerColor = ThemeLightBlue
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Frequently Asked Questions",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextNavyBlue
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            FaqItem("How does the Style Score work?", "Our AI analyzes your outfit's color harmony, fit, and occasion appropriateness to calculate your score.")
-            FaqItem("How can I improve my recommendations?", "Complete your Style Profile and log outfits daily for better personalized suggestions.")
-            FaqItem("Is my data secure?", "Yes, we use industry standard encryption and do not share your photos with unauthorized third parties.")
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            Text(
-                text = "Still need help?",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextNavyBlue
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Button(
-                onClick = {
-                    val intent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("mailto:facttech709@gmail.com")
-                        putExtra(Intent.EXTRA_SUBJECT, "Support Request: Style Advisor")
-                    }
-                    context.startActivity(intent)
-                },
+    Box(modifier = Modifier.fillMaxSize().background(GlobalBackgroundGradient)) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Help & Support", fontWeight = FontWeight.Bold, color = TextNavyBlue) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextNavyBlue)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            },
+            containerColor = Color.Transparent
+        ) { padding ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
             ) {
-                Icon(Icons.Default.Email, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Email Support", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                Text(
+                    text = "Frequently Asked Questions",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextNavyBlue
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                FaqItem("How does the Style Score work?", "Our AI analyzes your outfit's color harmony, fit, and occasion appropriateness to calculate your score.")
+                FaqItem("How can I improve my recommendations?", "Complete your Style Profile and log outfits daily for better personalized suggestions.")
+                FaqItem("Is my data secure?", "Yes, we use industry standard encryption and do not share your photos with unauthorized third parties.")
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                Text(
+                    text = "Still need help?",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextNavyBlue
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                Button(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                            data = Uri.parse("mailto:facttech709@gmail.com")
+                            putExtra(Intent.EXTRA_SUBJECT, "Support Request: Style Advisor")
+                        }
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                ) {
+                    Icon(Icons.Default.Email, contentDescription = null, tint = Color.White)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Email Support", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                }
             }
         }
     }

@@ -61,7 +61,7 @@ import com.example.styleadvisor.ui.profile.ProfileContent
 import com.example.styleadvisor.ui.profile.ProfileViewModel
 
 enum class BottomTab {
-    HOME, PROFILE
+    HOME, HISTORY, TIPS, PROFILE
 }
 
 @Composable
@@ -183,6 +183,15 @@ fun MainScreen(
                             isAnimationFinished = true
                         }
                     )
+                    BottomTab.HISTORY -> {
+                        com.example.styleadvisor.ui.history.HistoryScreen(
+                            onItemClick = onItemClick,
+                            viewModel = viewModel
+                        )
+                    }
+                    BottomTab.TIPS -> {
+                        com.example.styleadvisor.ui.tips.TipsContent(onItemClick = onItemClick)
+                    }
                     BottomTab.PROFILE -> {
                         profileViewModel?.let { ProfileContent(onItemClick = onItemClick, viewModel = it) }
                     }
@@ -204,7 +213,6 @@ fun HomeContent(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ThemeLightBlue)
             .verticalScroll(rememberScrollState())
     ) {
         Spacer(modifier = Modifier.height(4.dp))
@@ -221,11 +229,6 @@ fun HomeContent(
             onAnalyzeStarted = onAnalyzeStarted,
             onAnalyzeComplete = onAnalyzeComplete
         )
-        
-        Spacer(modifier = Modifier.height(20.dp))
-        
-        val history by com.example.styleadvisor.data.AnalysisRepository.history.collectAsState()
-        RecentAnalysesSection(history = history, onItemClick = onItemClick)
         
         Spacer(modifier = Modifier.height(32.dp))
         PromoSection()
@@ -551,9 +554,46 @@ fun AnalyzeButtonSection(
         
         Spacer(modifier = Modifier.height(24.dp))
         
-
-        
-        Spacer(modifier = Modifier.height(16.dp))
+        if (selectedImageUri == null) {
+            Button(
+                onClick = {
+                    permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(horizontal = 4.dp),
+                shape = CircleShape,
+                colors = ButtonDefaults.buttonColors(containerColor = TextNavyBlue)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PhotoCamera,
+                    contentDescription = "Camera",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Take Photo", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                HorizontalDivider(modifier = Modifier.width(80.dp), color = Color.LightGray.copy(alpha = 0.5f))
+                Text(
+                    text = "or",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = TextNavyBlue,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                HorizontalDivider(modifier = Modifier.width(80.dp), color = Color.LightGray.copy(alpha = 0.5f))
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+        }
         
         // Try with Sample
         Row(
@@ -584,58 +624,6 @@ fun AnalyzeButtonSection(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium
             )
-        }
-    }
-}
-
-@Composable
-fun RecentAnalysesSection(history: List<com.example.styleadvisor.data.HistoryItem>, onItemClick: (NavKey) -> Unit) {
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Recent Analyses",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextNavyBlue,
-                letterSpacing = (-0.2).sp
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(14.dp))
-        
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            if (history.isEmpty()) {
-                Text("No recent analyses yet.", color = TextMuted, fontSize = 14.sp)
-            } else {
-                history.forEach { item ->
-                    val scoreColor = when {
-                        item.result.overallScore >= 80 -> ScoreHigh
-                        item.result.overallScore >= 60 -> ScoreMedium
-                        else -> ScoreLow
-                    }
-                    val dateStr = java.text.SimpleDateFormat("d MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date(item.timestamp))
-                    AnalysisCard(
-                        title = item.result.shortTitle, 
-                        date = dateStr, 
-                        score = item.result.overallScore, 
-                        scoreColor = scoreColor, 
-                        imageUri = item.imageUri,
-                        onClick = { onItemClick(AnalysisResult) }
-                    )
-                }
-            }
         }
     }
 }
@@ -801,12 +789,13 @@ fun CustomBottomBar(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 32.dp),
+                    .padding(horizontal = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Home Tab
                 BottomNavItem(
+                    modifier = Modifier.weight(1f),
                     label = "Home",
                     icon = Icons.Rounded.Home,
                     isSelected = selectedTab == BottomTab.HOME,
@@ -816,8 +805,33 @@ fun CustomBottomBar(
                     onClick = { onTabSelected(BottomTab.HOME) }
                 )
                 
+                // History Tab
+                BottomNavItem(
+                    modifier = Modifier.weight(1f),
+                    label = "History",
+                    icon = Icons.Default.History,
+                    isSelected = selectedTab == BottomTab.HISTORY,
+                    selectedColor = BlueAccent,
+                    unselectedColor = Color.Black,
+                    selectedBgColor = LightBlueBg,
+                    onClick = { onTabSelected(BottomTab.HISTORY) }
+                )
+                
+                // Tips Tab
+                BottomNavItem(
+                    modifier = Modifier.weight(1f),
+                    label = "Tips",
+                    icon = Icons.Default.AutoAwesome,
+                    isSelected = selectedTab == BottomTab.TIPS,
+                    selectedColor = BlueAccent,
+                    unselectedColor = Color.Black,
+                    selectedBgColor = LightBlueBg,
+                    onClick = { onTabSelected(BottomTab.TIPS) }
+                )
+                
                 // Profile Tab (Me)
                 BottomNavItem(
+                    modifier = Modifier.weight(1f),
                     label = "Me",
                     icon = Icons.Rounded.Person,
                     isSelected = selectedTab == BottomTab.PROFILE,
@@ -829,48 +843,12 @@ fun CustomBottomBar(
             }
         }
         
-        // Floating Camera Button
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = (-24).dp)
-                .size(64.dp)
-                .shadow(
-                    elevation = 16.dp,
-                    shape = CircleShape,
-                    ambientColor = PrimaryBlue,
-                    spotColor = PrimaryBlue
-                )
-                .clip(CircleShape)
-                .background(Color.White)
-                .clickable { onCameraClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(58.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(ButtonBlueStart, ButtonBlueEnd)
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = "Camera",
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
-                
     }
 }
 
 @Composable
 fun BottomNavItem(
+    modifier: Modifier = Modifier,
     label: String, 
     icon: ImageVector, 
     isSelected: Boolean, 
@@ -880,8 +858,7 @@ fun BottomNavItem(
     onClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .width(80.dp)
+        modifier = modifier
             .height(56.dp)
             .clip(CircleShape)
             .background(if (isSelected) selectedBgColor else Color.Transparent)

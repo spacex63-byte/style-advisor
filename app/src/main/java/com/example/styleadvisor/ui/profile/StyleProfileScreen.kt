@@ -26,65 +26,67 @@ fun StyleProfileScreen(
     var bodyType by remember { mutableStateOf("Athletic") }
     var typicalOccasion by remember { mutableStateOf("Casual, Office") }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Edit Style Profile", fontWeight = FontWeight.Bold, color = TextNavyBlue) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextNavyBlue)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = ThemeLightBlue)
-            )
-        },
-        containerColor = ThemeLightBlue
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
-        ) {
-            OutlinedTextField(
-                value = preferredColors,
-                onValueChange = { preferredColors = it },
-                label = { Text("Preferred Colors") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = bodyType,
-                onValueChange = { bodyType = it },
-                label = { Text("Body Type") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = typicalOccasion,
-                onValueChange = { typicalOccasion = it },
-                label = { Text("Typical Occasions") },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Button(
-                onClick = {
-                    val progress = if (preferredColors.isNotBlank() && bodyType.isNotBlank() && typicalOccasion.isNotBlank()) 1.0f else 0.5f
-                    viewModel.updateStyleProfileProgress(progress)
-                    onBack()
-                },
+    Box(modifier = Modifier.fillMaxSize().background(GlobalBackgroundGradient)) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Edit Style Profile", fontWeight = FontWeight.Bold, color = TextNavyBlue) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = TextNavyBlue)
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                )
+            },
+            containerColor = Color.Transparent
+        ) { padding ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
             ) {
-                Text("Save Profile", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                OutlinedTextField(
+                    value = preferredColors,
+                    onValueChange = { preferredColors = it },
+                    label = { Text("Preferred Colors") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = bodyType,
+                    onValueChange = { bodyType = it },
+                    label = { Text("Body Type") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = typicalOccasion,
+                    onValueChange = { typicalOccasion = it },
+                    label = { Text("Typical Occasions") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Button(
+                    onClick = {
+                        val progress = if (preferredColors.isNotBlank() && bodyType.isNotBlank() && typicalOccasion.isNotBlank()) 1.0f else 0.5f
+                        viewModel.updateStyleProfileProgress(progress)
+                        onBack()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+                ) {
+                    Text("Save Profile", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                }
             }
         }
     }

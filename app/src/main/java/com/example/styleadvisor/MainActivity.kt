@@ -15,6 +15,7 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     installSplashScreen()
     super.onCreate(savedInstanceState)
+    com.example.styleadvisor.data.AnalysisRepository.init(this)
 
     enableEdgeToEdge()
     setContent {

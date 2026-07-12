@@ -8,3 +8,6 @@ import kotlinx.serialization.Serializable
 @Serializable data object HelpSupport : NavKey
 @Serializable data object PrivacyPolicy : NavKey
 @Serializable data object StyleProfile : NavKey
+@Serializable data object Onboarding : NavKey
+@Serializable data object Notifications : NavKey
+@Serializable data class TipDetail(val title: String, val category: String, val imageRes: Int? = null) : NavKey

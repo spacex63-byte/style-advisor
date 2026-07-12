@@ -39,16 +39,16 @@ class AnalysisViewModel : ViewModel() {
                 colorHarmonyScore = 95,
                 fitScore = 88,
                 styleScore = 94,
-                shortTitle = "Perfectly Preppy",
-                shortDescription = "Vibrant blue patterned shirt with structured layers creates a fantastic, balanced look.",
+                shortTitle = "Great Casual Look",
+                shortDescription = "A nice blue shirt with a jacket that makes you look smart and relaxed.",
                 primaryClothingItem = "Blue Patterned Shirt",
-                styleTags = listOf("Preppy", "Smart Casual", "Artsy"),
+                styleTags = listOf("Casual", "Smart", "Cool"),
                 bestForOccasions = listOf("Weekend Brunch", "Casual Outing", "Date Night"),
-                whatLooksBest = "The bold blue pattern is the star of the show. It pairs excellently with solid neutrals.",
-                whatCouldImprove = "Ensure the jacket sleeves are tailored to show just a quarter inch of the shirt cuff.",
+                whatLooksBest = "The blue shirt looks great and matches well with the jacket.",
+                whatCouldImprove = "Make sure the jacket sleeves fit nicely around your wrists.",
                 outfitElements = listOf("Blue Patterned Button-Down", "Neutral Jacket"),
                 detectedColors = listOf("#1E88E5", "#F5F5F5", "#212121"),
-                colorsDescription = "Vibrant blue anchors the outfit, accented by clean whites and dark neutrals."
+                colorsDescription = "Bright blue with nice white and dark colors."
             )
             com.example.styleadvisor.data.AnalysisRepository.addResult(mockResult, uri.toString())
             _uiState.value = AnalysisState.Success(mockResult)
@@ -79,6 +79,11 @@ class AnalysisViewModel : ViewModel() {
     fun reset() {
         _uiState.value = AnalysisState.Idle
         _selectedImageUri.value = null
+    }
+    
+    fun showHistoryItem(item: com.example.styleadvisor.data.HistoryItem) {
+        _selectedImageUri.value = item.imageUri?.let { Uri.parse(it) }
+        _uiState.value = AnalysisState.Success(item.result)
     }
     
     private fun loadBitmap(context: Context, uri: Uri): Bitmap? {
