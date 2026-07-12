@@ -49,6 +49,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import coil.compose.AsyncImage
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileContent(onItemClick: (NavKey) -> Unit = {}, viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     val state by viewModel.uiState.collectAsState()
@@ -64,37 +65,116 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}, viewModel: ProfileViewMod
     }
 
     if (showEditDialog) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         var newName by remember { mutableStateOf(state.name) }
         var newBio by remember { mutableStateOf(state.bio) }
-        AlertDialog(
+        
+        ModalBottomSheet(
             onDismissRequest = { showEditDialog = false },
-            title = { Text("Edit Profile") },
-            text = {
-                Column {
-                    OutlinedTextField(value = newName, onValueChange = { newName = it }, label = { Text("Name") })
-                    Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedTextField(value = newBio, onValueChange = { newBio = it }, label = { Text("Bio") })
-                    Spacer(modifier = Modifier.height(16.dp))
-                    TextButton(
-                        onClick = { launcher.launch("image/*") },
-                        modifier = Modifier.fillMaxWidth()
+            sheetState = sheetState,
+            containerColor = Color.White
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Edit Profile",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextNavyBlue
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Beautiful Profile Icon
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                        .background(SurfaceVariant)
+                        .clickable { launcher.launch("image/*") },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (state.profileImageUri != null) {
+                        AsyncImage(
+                            model = state.profileImageUri,
+                            contentDescription = "Profile Picture",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = TextMuted.copy(alpha = 0.5f)
+                        )
+                    }
+                    
+                    // Camera overlay for editing
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.3f)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(imageVector = Icons.Default.CameraAlt, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Change Profile Photo")
+                        Icon(
+                            imageVector = Icons.Default.CameraAlt,
+                            contentDescription = "Change Photo",
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
                     }
                 }
-            },
-            confirmButton = {
-                Button(onClick = {
-                    viewModel.updateProfile(newName, newBio)
-                    showEditDialog = false
-                }) { Text("Save") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showEditDialog = false }) { Text("Cancel") }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Tap to change photo",
+                    fontSize = 12.sp,
+                    color = TextMuted
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text("Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = newBio,
+                    onValueChange = { newBio = it },
+                    label = { Text("Bio") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                Button(
+                    onClick = {
+                        viewModel.updateProfile(newName, newBio)
+                        showEditDialog = false
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = TextNavyBlue)
+                ) {
+                    Text("Save Changes", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
             }
-        )
+        }
     }
     Column(
         modifier = Modifier
@@ -140,8 +220,8 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}, viewModel: ProfileViewMod
                 .padding(16.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Avatar with Camera Badge
-                Box(modifier = Modifier.clickable { launcher.launch("image/*") }) {
+                // Avatar
+                Box(modifier = Modifier.clickable { showEditDialog = true }) {
                     Box(
                         modifier = Modifier
                             .size(60.dp)
@@ -163,23 +243,6 @@ fun ProfileContent(onItemClick: (NavKey) -> Unit = {}, viewModel: ProfileViewMod
                                 tint = TextMuted.copy(alpha = 0.3f)
                             )
                         }
-                    }
-                    
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(24.dp)
-                            .clip(CircleShape)
-                            .background(TextNavyBlue)
-                            .border(2.dp, Color.White, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CameraAlt,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(12.dp)
-                        )
                     }
                 }
                 

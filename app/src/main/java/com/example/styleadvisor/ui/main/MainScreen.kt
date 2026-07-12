@@ -71,7 +71,7 @@ fun MainScreen(
     viewModel: AnalysisViewModel? = null,
     profileViewModel: ProfileViewModel? = null
 ) {
-    var selectedTab by remember { mutableStateOf(BottomTab.HOME) }
+    val selectedTab by (viewModel?.selectedTab ?: kotlinx.coroutines.flow.MutableStateFlow(BottomTab.HOME)).collectAsState()
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isAnalyzing by remember { mutableStateOf(false) }
     var isAnimationFinished by remember { mutableStateOf(false) }
@@ -141,7 +141,7 @@ fun MainScreen(
         bottomBar = { 
             CustomBottomBar(
                 selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it },
+                onTabSelected = { viewModel?.setSelectedTab(it) },
                 onCameraClick = { permissionLauncher.launch(android.Manifest.permission.CAMERA) }
             ) 
         }

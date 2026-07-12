@@ -30,6 +30,14 @@ class AnalysisViewModel : ViewModel() {
     private val _selectedImageUri = MutableStateFlow<Uri?>(null)
     val selectedImageUri: StateFlow<Uri?> = _selectedImageUri
     
+    private val _selectedTab = MutableStateFlow(com.example.styleadvisor.ui.main.BottomTab.HOME)
+    val selectedTab: StateFlow<com.example.styleadvisor.ui.main.BottomTab> = _selectedTab
+    
+    fun setSelectedTab(tab: com.example.styleadvisor.ui.main.BottomTab) {
+        _selectedTab.value = tab
+    }
+    
+
     fun analyzeImage(context: Context, uri: Uri, isSample: Boolean = false) {
         _selectedImageUri.value = uri
         
@@ -64,11 +72,17 @@ class AnalysisViewModel : ViewModel() {
                     return@launch
                 }
                 
+                // Copy image to internal storage so it persists
+                val savedUri = copyImageToInternalStorage(context, uri)
+                if (savedUri != null) {
+                    _selectedImageUri.value = savedUri
+                }
+                
                 // Scale bitmap down to reduce token usage and speed up API
                 val scaledBitmap = scaleBitmap(bitmap, 800)
                 
                 val result = aiService.analyzeOutfit(scaledBitmap)
-                com.example.styleadvisor.data.AnalysisRepository.addResult(result, uri.toString())
+                com.example.styleadvisor.data.AnalysisRepository.addResult(result, (savedUri ?: uri).toString())
                 _uiState.value = AnalysisState.Success(result)
             } catch (e: Exception) {
                 _uiState.value = AnalysisState.Error(e.message ?: "Unknown error occurred")
@@ -84,6 +98,27 @@ class AnalysisViewModel : ViewModel() {
     fun showHistoryItem(item: com.example.styleadvisor.data.HistoryItem) {
         _selectedImageUri.value = item.imageUri?.let { Uri.parse(it) }
         _uiState.value = AnalysisState.Success(item.result)
+    }
+    
+    private fun copyImageToInternalStorage(context: Context, uri: Uri): Uri? {
+        return try {
+            val imagesDir = java.io.File(context.filesDir, "analysis_images")
+            if (!imagesDir.exists()) imagesDir.mkdirs()
+            
+            val fileName = "outfit_${System.currentTimeMillis()}.jpg"
+            val destFile = java.io.File(imagesDir, fileName)
+            
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                destFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            
+            Uri.fromFile(destFile)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
     
     private fun loadBitmap(context: Context, uri: Uri): Bitmap? {

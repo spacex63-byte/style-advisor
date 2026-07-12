@@ -78,52 +78,42 @@ fun HistoryScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Top Stats
-            LazyRow(
+            // Top Stats — computed from real history data
+            val totalAnalyses = history.size
+            val avgScore = if (history.isNotEmpty()) history.map { it.result.overallScore }.average().toInt() else 0
+            val bestScore = if (history.isNotEmpty()) history.maxOf { it.result.overallScore } else 0
+            
+            Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                item {
-                    StatCard(
-                        icon = {
-                            Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFFFF5252), modifier = Modifier.size(18.dp))
-                        },
-                        iconBg = Color(0xFFFFF0F0),
-                        value = "12",
-                        label = "Total Analyses"
-                    )
-                }
-                item {
-                    StatCard(
-                        icon = {
-                            Icon(Icons.Outlined.Insights, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(18.dp))
-                        },
-                        iconBg = Color(0xFFF0FFF0),
-                        value = "88",
-                        label = "Avg. Score"
-                    )
-                }
-                item {
-                    StatCard(
-                        icon = {
-                            Icon(Icons.Default.WorkspacePremium, contentDescription = null, tint = Color(0xFF9C27B0), modifier = Modifier.size(18.dp))
-                        },
-                        iconBg = Color(0xFFFAF0FF),
-                        value = "5",
-                        label = "Best Score"
-                    )
-                }
-                item {
-                    StatCard(
-                        icon = {
-                            Icon(Icons.Outlined.CalendarMonth, contentDescription = null, tint = Color(0xFFFF9800), modifier = Modifier.size(18.dp))
-                        },
-                        iconBg = Color(0xFFFFF7ED),
-                        value = "This Month",
-                        label = "Most Active",
-                        valueSize = 14
-                    )
-                }
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = {
+                        Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFFFF5252), modifier = Modifier.size(18.dp))
+                    },
+                    iconBg = Color(0xFFFFF0F0),
+                    value = "$totalAnalyses",
+                    label = "Total Analyses"
+                )
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = {
+                        Icon(Icons.Outlined.Insights, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(18.dp))
+                    },
+                    iconBg = Color(0xFFF0FFF0),
+                    value = "$avgScore",
+                    label = "Avg. Score"
+                )
+                StatCard(
+                    modifier = Modifier.weight(1f),
+                    icon = {
+                        Icon(Icons.Default.WorkspacePremium, contentDescription = null, tint = Color(0xFF9C27B0), modifier = Modifier.size(18.dp))
+                    },
+                    iconBg = Color(0xFFFAF0FF),
+                    value = "$bestScore",
+                    label = "Best Score"
+                )
             }
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -187,6 +177,7 @@ fun HistoryScreen(
 
 @Composable
 fun StatCard(
+    modifier: Modifier = Modifier,
     icon: @Composable () -> Unit,
     iconBg: Color,
     value: String,
@@ -194,9 +185,8 @@ fun StatCard(
     valueSize: Int = 20
 ) {
     Column(
-        modifier = Modifier
-            .width(96.dp)
-            .clip(RoundedCornerShape(12.dp))
+        modifier = modifier
+            .clip(RoundedCornerShape(18.dp))
             .background(Color.White)
             .padding(12.dp),
         horizontalAlignment = Alignment.Start
@@ -258,7 +248,7 @@ fun HistoryListItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(Color.White)
             .clickable(onClick = onClick)
             .padding(8.dp),
@@ -270,15 +260,17 @@ fun HistoryListItem(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .size(64.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .width(64.dp)
+                .height(74.dp)
+                .clip(RoundedCornerShape(12.dp))
         )
         
         Spacer(modifier = Modifier.width(12.dp))
         
         // Content
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = item.result.shortTitle,
@@ -289,28 +281,28 @@ fun HistoryListItem(
                 overflow = TextOverflow.Ellipsis
             )
             
+            Spacer(modifier = Modifier.height(1.dp))
+            
             Text(
                 text = dateStr,
                 fontSize = 10.sp,
                 color = TextMuted
             )
             
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(3.dp))
             
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(pillBg)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = badgeLabel,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = pillText
-                    )
-                }
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(pillBg)
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = badgeLabel,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = pillText
+                )
             }
         }
         

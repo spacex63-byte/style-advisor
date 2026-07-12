@@ -16,6 +16,7 @@ class MainActivity : ComponentActivity() {
     installSplashScreen()
     super.onCreate(savedInstanceState)
     com.example.styleadvisor.data.AnalysisRepository.init(this)
+    com.example.styleadvisor.ui.tips.BookmarksManager.init(this)
 
     enableEdgeToEdge()
     setContent {

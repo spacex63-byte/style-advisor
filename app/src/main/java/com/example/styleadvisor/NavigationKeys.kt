@@ -10,4 +10,4 @@ import kotlinx.serialization.Serializable
 @Serializable data object StyleProfile : NavKey
 @Serializable data object Onboarding : NavKey
 @Serializable data object Notifications : NavKey
-@Serializable data class TipDetail(val title: String, val category: String, val imageRes: Int? = null) : NavKey
+@Serializable data class TipDetail(val title: String, val category: String, val imageRes: Int? = null, val imageUrl: String? = null) : NavKey

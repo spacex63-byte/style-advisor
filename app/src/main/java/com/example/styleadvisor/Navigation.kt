@@ -63,6 +63,7 @@ fun MainNavigation() {
             title = it.title,
             category = it.category,
             imageRes = it.imageRes,
+            imageUrl = it.imageUrl,
             onBack = { backStack.removeLastOrNull() }
           )
         }
